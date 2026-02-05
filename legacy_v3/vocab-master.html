@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Master — 词汇大师</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0F1419; --bg-surface: #1A1F26; --bg-card: #242B35; --bg-hover: #2E3744;
+            --coral: #FF7F6B; --mint: #5FCFB5; --purple: #9B8AFF; --gold: #FFD93D; --red: #FF6B6B;
+            --text-1: #F5F7FA; --text-2: #9BA3AF; --text-3: #5D6570;
+            --border-1: rgba(255,255,255,0.06); --border-2: rgba(255,255,255,0.1);
+            --font-h: 'Crimson Pro', serif; --font-b: 'DM Sans', sans-serif; --font-m: 'Source Code Pro', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-b); background: var(--bg-deep); color: var(--text-1); min-height: 100vh; }
+        
+        .app { display: grid; grid-template-columns: 260px 1fr 340px; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--bg-surface); border-right: 1px solid var(--border-1); padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--coral), #FFB347); border-radius: 10px; display: grid; place-items: center; }
+        .logo-icon svg { width: 22px; height: 22px; color: white; }
+        .logo h1 { font-family: var(--font-h); font-size: 20px; background: linear-gradient(135deg, var(--coral), #FFB347); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .streak { background: linear-gradient(135deg, rgba(255,217,61,0.12), rgba(255,127,107,0.08)); border: 1px solid rgba(255,217,61,0.25); border-radius: 14px; padding: 16px; text-align: center; }
+        .streak-val { font-size: 36px; font-weight: 700; color: var(--gold); }
+        .streak-lbl { font-size: 12px; color: var(--text-2); }
+        
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat { background: var(--bg-card); border-radius: 10px; padding: 14px; text-align: center; }
+        .stat-v { font-size: 22px; font-weight: 700; color: var(--mint); }
+        .stat-l { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+        
+        .tags-sec h3 { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { padding: 5px 10px; border-radius: 16px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-2); background: var(--bg-card); color: var(--text-2); }
+        .tag:hover, .tag.active { background: var(--coral); color: white; border-color: var(--coral); }
+        .tag-cnt { opacity: 0.7; margin-left: 3px; }
+        
+        .io-btns { display: flex; gap: 8px; margin-top: auto; }
+        .io-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-2); background: var(--bg-card); color: var(--text-2); transition: all 0.2s; }
+        .io-btn:hover { border-color: var(--mint); color: var(--mint); }
+        
+        /* Main */
+        .main { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--bg-surface); border: 1px solid var(--border-1); color: var(--text-2); }
+        .tab:hover { border-color: var(--border-2); }
+        .tab.active { background: var(--coral); color: white; border-color: var(--coral); }
+        
+        .input-sec { background: var(--bg-surface); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border-1); }
+        .input-row { display: flex; gap: 10px; }
+        .input-wrap { flex: 1; }
+        .word-in { width: 100%; height: 50px; padding: 0 16px; font-size: 15px; font-family: var(--font-h); background: var(--bg-card); border: 2px solid var(--border-1); border-radius: 10px; color: var(--text-1); }
+        .word-in:focus { outline: none; border-color: var(--coral); }
+        .btn-add { height: 50px; padding: 0 24px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, var(--coral), #FFB347); border: none; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,127,107,0.25); }
+        .tag-sel { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+        .tag-sel label { font-size: 11px; color: var(--text-3); }
+        .tag-sel select { padding: 6px 10px; border-radius: 6px; background: var(--bg-card); border: 1px solid var(--border-1); color: var(--text-1); font-size: 12px; }
+        
+        .cards-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cards-hdr h2 { font-family: var(--font-h); font-size: 18px; }
+        .cards-hdr span { font-size: 11px; color: var(--text-3); }
+        .cards { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; }
+        
+        .card { background: var(--bg-surface); border: 1px solid var(--border-1); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.25s; }
+        .card:hover { border-color: var(--border-2); transform: translateX(6px); }
+        .card.mastered { border-left: 3px solid var(--mint); }
+        .card.learning { border-left: 3px solid var(--gold); }
+        .card.new { border-left: 3px solid var(--purple); }
+        .card-info { flex: 1; min-width: 0; }
+        .card-word { font-family: var(--font-h); font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+        .card-ph { font-family: var(--font-m); font-size: 13px; color: var(--mint); margin-bottom: 4px; }
+        .card-ph .src { font-size: 9px; background: rgba(95,207,181,0.15); padding: 1px 5px; border-radius: 3px; margin-left: 6px; }
+        .card-def { font-size: 12px; color: var(--text-2); line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pos { display: inline-block; font-size: 9px; font-weight: 600; padding: 2px 5px; border-radius: 3px; background: rgba(155,138,255,0.15); color: var(--purple); margin-right: 4px; }
+        .card-tag { font-size: 9px; padding: 2px 6px; border-radius: 8px; background: var(--bg-card); color: var(--text-3); margin-top: 6px; display: inline-block; }
+        .play-btn { width: 42px; height: 42px; border: none; border-radius: 50%; background: linear-gradient(135deg, var(--mint), #4BA8FF); color: white; cursor: pointer; display: grid; place-items: center; flex-shrink: 0; }
+        .play-btn:hover { transform: scale(1.1); }
+        .play-btn svg { width: 18px; height: 18px; }
+        
+        /* Flashcard */
+        .fc-wrap { display: none; flex-direction: column; align-items: center; flex: 1; }
+        .fc-wrap.active { display: flex; }
+        .fc { width: 100%; max-width: 480px; height: 300px; perspective: 1000px; cursor: pointer; margin-bottom: 20px; }
+        .fc-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s; }
+        .fc.flipped .fc-inner { transform: rotateY(180deg); }
+        .fc-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; }
+        .fc-front { background: linear-gradient(135deg, var(--bg-surface), var(--bg-card)); border: 1px solid var(--border-2); }
+        .fc-back { background: linear-gradient(135deg, rgba(95,207,181,0.08), rgba(75,168,255,0.08)); border: 1px solid var(--mint); transform: rotateY(180deg); }
+        .fc-word { font-family: var(--font-h); font-size: 38px; font-weight: 700; margin-bottom: 8px; }
+        .fc-ph { font-family: var(--font-m); font-size: 16px; color: var(--mint); }
+        .fc-def { font-size: 16px; line-height: 1.6; }
+        .fc-hint { font-size: 12px; color: var(--text-3); margin-top: 12px; }
+        .fc-ctrls { display: flex; gap: 12px; }
+        .fc-btn { padding: 12px 24px; border-radius: 10px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+        .fc-btn.hard { background: var(--red); color: white; }
+        .fc-btn.good { background: var(--gold); color: #1A1F26; }
+        .fc-btn.easy { background: var(--mint); color: #1A1F26; }
+        .fc-btn:hover { transform: translateY(-2px); }
+        .fc-rem { font-size: 12px; color: var(--text-3); margin-top: 16px; }
+        
+        /* Panel */
+        .panel { background: var(--bg-surface); border-left: 1px solid var(--border-1); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .panel-hdr h2 { font-family: var(--font-h); font-size: 16px; margin-bottom: 4px; }
+        .panel-hdr p { font-size: 11px; color: var(--text-3); }
+        
+        .due-sec { }
+        .due-title { font-size: 11px; font-weight: 600; color: var(--coral); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .due-cnt { background: var(--coral); color: white; padding: 2px 7px; border-radius: 8px; font-size: 10px; }
+        .due-list { display: flex; flex-direction: column; gap: 6px; }
+        .due-item { background: var(--bg-card); border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .due-w { font-weight: 600; }
+        .due-t { font-size: 10px; color: var(--text-3); }
+        
+        .ai-sec { background: var(--bg-card); border-radius: 14px; padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        .ai-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .ai-av { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--mint), #4BA8FF); display: grid; place-items: center; }
+        .ai-av svg { width: 18px; height: 18px; color: white; }
+        .ai-info { font-size: 13px; font-weight: 600; }
+        .ai-badge { font-size: 9px; padding: 2px 6px; border-radius: 8px; background: rgba(95,207,181,0.15); color: var(--mint); margin-left: 6px; }
+        .ai-content { font-size: 13px; line-height: 1.7; color: var(--text-2); flex: 1; overflow-y: auto; }
+        .ai-content h4 { font-size: 12px; color: var(--mint); margin: 14px 0 6px 0; }
+        .ai-content h4:first-child { margin-top: 0; }
+        .ai-ex { background: rgba(95,207,181,0.06); border-left: 2px solid var(--mint); padding: 10px 12px; border-radius: 6px; font-style: italic; margin: 6px 0; }
+        .ai-src { font-size: 9px; color: var(--text-3); background: var(--bg-surface); padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+        
+        .empty { text-align: center; padding: 50px 16px; color: var(--text-3); }
+        .empty svg { width: 56px; height: 56px; opacity: 0.25; margin-bottom: 12px; }
+        .empty h3 { font-family: var(--font-h); font-size: 18px; color: var(--text-2); margin-bottom: 6px; }
+        
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg-card); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 20px; font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,0.25); z-index: 1000; opacity: 0; transition: all 0.25s; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.ok { border-color: var(--mint); }
+        .toast.err { border-color: var(--red); }
+        
+        .ld { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 30px; }
+        .ld-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); animation: ldp 1.2s ease-in-out infinite; }
+        .ld-dot:nth-child(2) { animation-delay: 0.15s; }
+        .ld-dot:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes ldp { 0%, 100% { transform: scale(0.5); opacity: 0.4; } 50% { transform: scale(1); opacity: 1; } }
+        
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; place-items: center; z-index: 100; }
+        .modal.open { display: grid; }
+        .modal-box { background: var(--bg-surface); border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; }
+        .modal-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-hdr h3 { font-family: var(--font-h); font-size: 18px; }
+        .modal-close { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 20px; }
+        .modal-body { margin-bottom: 16px; }
+        .modal-body p { font-size: 13px; color: var(--text-2); margin-bottom: 12px; }
+        .modal-body input[type="file"] { width: 100%; padding: 12px; background: var(--bg-card); border: 1px dashed var(--border-2); border-radius: 8px; color: var(--text-1); }
+        .modal-opts { display: flex; gap: 8px; margin-top: 12px; }
+        .modal-opt { flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-2); background: var(--bg-card); color: var(--text-2); }
+        .modal-opt.active { border-color: var(--coral); color: var(--coral); }
+        .modal-acts { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+        .modal-btn.cancel { background: var(--bg-card); color: var(--text-2); }
+        .modal-btn.confirm { background: var(--coral); color: white; }
+        
+        @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } .sidebar, .panel { display: none; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <h1>Vocab Master</h1>
+        </div>
+        <div class="streak"><div>🔥</div><div class="streak-val" id="streakVal">0</div><div class="streak-lbl">连续学习天数</div></div>
+        <div class="stats">
+            <div class="stat"><div class="stat-v" id="sTotal">0</div><div class="stat-l">总词汇</div></div>
+            <div class="stat"><div class="stat-v" id="sMaster">0</div><div class="stat-l">已掌握</div></div>
+            <div class="stat"><div class="stat-v" id="sNew">0</div><div class="stat-l">今日新增</div></div>
+            <div class="stat"><div class="stat-v" id="sReview">0</div><div class="stat-l">今日复习</div></div>
+        </div>
+        <div class="tags-sec">
+            <h3>分类标签</h3>
+            <div class="tags" id="tagList"></div>
+        </div>
+        <div class="io-btns">
+            <button class="io-btn" id="btnExport">📤 导出</button>
+            <button class="io-btn" id="btnImport">📥 导入</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="tabs">
+            <div class="tab active" data-m="list">📚 词汇库</div>
+            <div class="tab" data-m="fc">🎴 闪卡复习</div>
+        </div>
+        <div id="listMode">
+            <div class="input-sec">
+                <div class="input-row">
+                    <div class="input-wrap"><input type="text" class="word-in" id="wordIn" placeholder="输入英语单词，如 serendipity..."></div>
+                    <button class="btn-add" id="btnAdd"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 添加</button>
+                </div>
+                <div class="tag-sel"><label>分类:</label><select id="tagSel"><option value="daily">日常</option><option value="business">商务</option><option value="academic">学术</option><option value="tech">科技</option></select></div>
+            </div>
+            <div class="cards-hdr"><h2>我的词汇库</h2><span>数据源: Free Dictionary API</span></div>
+            <div class="cards" id="cardList"></div>
+        </div>
+        <div class="fc-wrap" id="fcMode">
+            <div class="fc" id="fc"><div class="fc-inner"><div class="fc-face fc-front"><div class="fc-word" id="fcW">—</div><div class="fc-ph" id="fcP">/—/</div><div class="fc-hint">点击翻转 →</div></div><div class="fc-face fc-back"><div class="fc-def" id="fcD">—</div></div></div></div>
+            <div class="fc-ctrls"><button class="fc-btn hard" onclick="rate(1)">😓 困难</button><button class="fc-btn good" onclick="rate(3)">🤔 一般</button><button class="fc-btn easy" onclick="rate(5)">😎 简单</button></div>
+            <div class="fc-rem">剩余 <strong id="fcRem">0</strong> 张</div>
+        </div>
+    </main>
+
+    <aside class="panel">
+        <div class="panel-hdr"><h2>📅 复习计划</h2><p>SM-2 遗忘曲线算法</p></div>
+        <div class="due-sec"><div class="due-title">今日待复习 <span class="due-cnt" id="dueCnt">0</span></div><div class="due-list" id="dueList"></div></div>
+        <div class="ai-sec"><div class="ai-hdr"><div class="ai-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1v3h-1a7 7 0 0 1-7 7H10a7 7 0 0 1-7-7H2v-3h1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 12 2z"/><circle cx="10" cy="14" r="1.5"/><circle cx="14" cy="14" r="1.5"/></svg></div><div class="ai-info">AI 助手 <span class="ai-badge">DeepSeek</span></div></div><div class="ai-content" id="aiContent"><p style="color:var(--text-3);text-align:center;padding:16px 0;">点击单词查看 AI 内容</p></div></div>
+    </aside>
+</div>
+
+<div class="modal" id="importModal">
+    <div class="modal-box">
+        <div class="modal-hdr"><h3>导入词汇</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-body">
+            <p>选择 JSON 或 CSV 文件导入词汇</p>
+            <input type="file" id="importFile" accept=".json,.csv">
+            <div class="modal-opts">
+                <div class="modal-opt active" data-mode="merge">合并</div>
+                <div class="modal-opt" data-mode="replace">覆盖</div>
+            </div>
+        </div>
+        <div class="modal-acts">
+            <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+            <button class="modal-btn confirm" onclick="doImport()">导入</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEEPSEEK_KEY = 'sk-807f70671f644583a655d6de4a4995fa';
+const TAGS = ['all', 'daily', 'business', 'academic', 'tech'];
+const TAG_NAMES = { all: '全部', daily: '日常', business: '商务', academic: '学术', tech: '科技' };
+
+const S = {
+    words: JSON.parse(localStorage.getItem('vocabMasterData') || '[]'),
+    tag: 'all',
+    mode: 'list',
+    fcIdx: 0,
+    due: [],
+    streak: +localStorage.getItem('vmStreak') || 0,
+    lastDate: localStorage.getItem('vmLastDate') || '',
+    importMode: 'merge'
+};
+
+// SM-2 Algorithm
+function sm2(card, q) {
+    let { rep = 0, ef = 2.5, iv = 1 } = card;
+    if (q >= 3) {
+        if (rep === 0) iv = 1;
+        else if (rep === 1) iv = 6;
+        else iv = Math.round(iv * ef);
+        rep++;
+    } else { rep = 0; iv = 1; }
+    ef = Math.max(1.3, ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+    const next = new Date(); next.setDate(next.getDate() + iv);
+    return { rep, ef: Math.round(ef * 100) / 100, iv, next: next.toISOString() };
+}
+
+// Dictionary API
+async function fetchWord(w) {
+    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`);
+    if (!r.ok) throw new Error('未找到');
+    const d = (await r.json())[0];
+    let ph = d.phonetic || '', au = '';
+    if (d.phonetics) for (const p of d.phonetics) {
+        if (p.audio?.includes('us')) { au = p.audio; if (p.text) ph = p.text; break; }
+        if (p.audio && !au) { au = p.audio; if (p.text && !ph) ph = p.text; }
+    }
+    const ms = d.meanings.slice(0, 2).map(m => ({
+        pos: m.partOfSpeech,
+        defs: m.definitions.slice(0, 2).map(x => x.definition),
+        exs: m.definitions.filter(x => x.example).slice(0, 1).map(x => x.example)
+    }));
+    return { word: d.word, ph: ph || '/—/', au, ms, src: 'Free Dictionary API' };
+}
+
+// DeepSeek AI
+async function callAI(word) {
+    const r = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+        body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+                { role: 'system', content: '你是英语教学专家。用中文为单词提供：1个地道例句、助记法、使用场景。简洁生动，100字内。' },
+                { role: 'user', content: `单词: "${word.word}" (${word.ms[0]?.pos}: ${word.ms[0]?.defs[0]})` }
+            ],
+            temperature: 0.7
+        })
+    });
+    const d = await r.json();
+    return d.choices?.[0]?.message?.content || '生成失败';
+}
+
+// Render
+function render() {
+    updateStats(); renderTags(); renderCards(); renderDue(); checkStreak();
+}
+
+function updateStats() {
+    document.getElementById('sTotal').textContent = S.words.length;
+    document.getElementById('sMaster').textContent = S.words.filter(w => (w.rep || 0) >= 3).length;
+    const td = new Date().toDateString();
+    document.getElementById('sNew').textContent = S.words.filter(w => new Date(w.added).toDateString() === td).length;
+    document.getElementById('sReview').textContent = S.words.filter(w => w.reviewed && new Date(w.reviewed).toDateString() === td).length;
+    document.getElementById('streakVal').textContent = S.streak;
+}
+
+function renderTags() {
+    document.getElementById('tagList').innerHTML = TAGS.map(t => {
+        const cnt = t === 'all' ? S.words.length : S.words.filter(w => w.tag === t).length;
+        return `<div class="tag${S.tag === t ? ' active' : ''}" data-tag="${t}">${TAG_NAMES[t]}<span class="tag-cnt">(${cnt})</span></div>`;
+    }).join('');
+    document.querySelectorAll('.tag').forEach(el => el.onclick = () => { S.tag = el.dataset.tag; render(); });
+}
+
+function renderCards() {
+    let ws = S.words;
+    if (S.tag !== 'all') ws = ws.filter(w => w.tag === S.tag);
+    if (!ws.length) {
+        document.getElementById('cardList').innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><h3>暂无词汇</h3><p>添加第一个单词开始学习</p></div>`;
+        return;
+    }
+    document.getElementById('cardList').innerHTML = ws.map((w, i) => {
+        const st = (w.rep || 0) >= 3 ? 'mastered' : (w.rep || 0) >= 1 ? 'learning' : 'new';
+        const idx = S.words.indexOf(w);
+        return `<div class="card ${st}" onclick="selectWord(${idx})"><div class="card-info"><div class="card-word">${w.word}</div><div class="card-ph">${w.ph}<span class="src">${w.src || 'API'}</span></div><div class="card-def">${w.ms.map(m => `<span class="pos">${m.pos}</span>${m.defs[0]}`).join(' ')}</div><div class="card-tag">#${w.tag || 'daily'}</div></div><button class="play-btn" onclick="event.stopPropagation();play('${w.au}','${w.word}')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg></button></div>`;
+    }).join('');
+}
+
+function renderDue() {
+    const now = new Date();
+    S.due = S.words.filter(w => !w.next || new Date(w.next) <= now);
+    document.getElementById('dueCnt').textContent = S.due.length;
+    document.getElementById('fcRem').textContent = S.due.length;
+    document.getElementById('dueList').innerHTML = S.due.slice(0, 5).map(w => `<div class="due-item"><span class="due-w">${w.word}</span><span class="due-t">${w.next ? '已到期' : '新词'}</span></div>`).join('') || '<p style="font-size:11px;color:var(--text-3);text-align:center;padding:10px">今日无待复习</p>';
+}
+
+function checkStreak() {
+    const td = new Date().toDateString(), yd = new Date(Date.now() - 864e5).toDateString();
+    if (S.lastDate === td) return;
+    if (S.lastDate === yd) S.streak++;
+    else if (S.lastDate !== td) S.streak = S.words.some(w => new Date(w.added).toDateString() === td) ? 1 : 0;
+    S.lastDate = td;
+    localStorage.setItem('vmStreak', S.streak);
+    localStorage.setItem('vmLastDate', td);
+}
+
+// Actions
+async function addWord() {
+    const w = document.getElementById('wordIn').value.trim().toLowerCase();
+    if (!w) return;
+    if (S.words.some(x => x.word === w)) { toast('已存在', 'err'); return; }
+    document.getElementById('btnAdd').innerHTML = '<div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div>';
+    try {
+        const d = await fetchWord(w);
+        S.words.unshift({ ...d, tag: document.getElementById('tagSel').value, added: new Date().toISOString(), rep: 0, ef: 2.5, iv: 1 });
+        save(); render();
+        document.getElementById('wordIn').value = '';
+        toast(`"${w}" 已添加 ✓`);
+    } catch (e) { toast(e.message, 'err'); }
+    document.getElementById('btnAdd').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 添加';
+}
+
+async function selectWord(idx) {
+    const w = S.words[idx];
+    const el = document.getElementById('aiContent');
+    el.innerHTML = '<div class="ld"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div>';
+    
+    // 权威例句
+    const ex = w.ms.find(m => m.exs?.length)?.exs[0];
+    let aiTxt = '';
+    try { aiTxt = await callAI(w); } catch (e) { aiTxt = 'AI 调用失败'; }
+    
+    el.innerHTML = `
+        <h4>📖 权威例句 <span class="ai-src">Free Dictionary API</span></h4>
+        ${ex ? `<div class="ai-ex">"${ex}"</div>` : '<p style="color:var(--text-3)">API 未提供</p>'}
+        <h4>🤖 AI 辅助 <span class="ai-src">DeepSeek 生成</span></h4>
+        <p>${aiTxt.replace(/\n/g, '<br>')}</p>
+        <h4>📊 学习进度</h4>
+        <p>复习: ${w.rep || 0}次 | 难度: ${w.ef || 2.5} | 下次: ${w.next ? new Date(w.next).toLocaleDateString() : '今天'}</p>
+    `;
+}
+
+function play(au, word) {
+    if (au) new Audio(au).play();
+    else { const u = new SpeechSynthesisUtterance(word); u.lang = 'en-US'; speechSynthesis.speak(u); }
+}
+
+// Flashcard
+function showFC() {
+    if (!S.due.length) { toast('无待复习'); return; }
+    S.fcIdx = 0; updateFC();
+}
+
+function updateFC() {
+    const c = S.due[S.fcIdx];
+    if (!c) { toast('复习完成 🎉'); switchMode('list'); return; }
+    document.getElementById('fcW').textContent = c.word;
+    document.getElementById('fcP').textContent = c.ph;
+    document.getElementById('fcD').textContent = c.ms.map(m => `[${m.pos}] ${m.defs.join('; ')}`).join('\n\n');
+    document.getElementById('fc').classList.remove('flipped');
+    document.getElementById('fcRem').textContent = S.due.length - S.fcIdx;
+}
+
+window.rate = function(q) {
+    const c = S.due[S.fcIdx], idx = S.words.findIndex(w => w.word === c.word);
+    const u = sm2(c, q);
+    S.words[idx] = { ...S.words[idx], ...u, reviewed: new Date().toISOString() };
+    save(); S.fcIdx++; updateFC(); render();
+};
+
+function switchMode(m) {
+    S.mode = m;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.m === m));
+    document.getElementById('listMode').style.display = m === 'list' ? 'block' : 'none';
+    document.getElementById('fcMode').classList.toggle('active', m === 'fc');
+    if (m === 'fc') showFC();
+}
+
+// Import/Export
+function exportData() {
+    const blob = new Blob([JSON.stringify(S.words, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `vocab-master-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); toast('导出成功');
+}
+
+function openImportModal() { document.getElementById('importModal').classList.add('open'); }
+function closeModal() { document.getElementById('importModal').classList.remove('open'); }
+
+function doImport() {
+    const f = document.getElementById('importFile').files[0];
+    if (!f) { toast('请选择文件', 'err'); return; }
+    const r = new FileReader();
+    r.onload = e => {
+        try {
+            let data;
+            if (f.name.endsWith('.csv')) {
+                const lines = e.target.result.split('\n').filter(l => l.trim());
+                data = lines.slice(1).map(l => {
+                    const [word, ph, def, tag] = l.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
+                    return { word, ph: ph || '/—/', ms: [{ pos: 'n.', defs: [def || ''], exs: [] }], tag: tag || 'daily', src: 'CSV导入', added: new Date().toISOString(), rep: 0, ef: 2.5, iv: 1 };
+                });
+            } else {
+                data = JSON.parse(e.target.result);
+            }
+            if (S.importMode === 'replace') S.words = data;
+            else {
+                const existing = new Set(S.words.map(w => w.word));
+                data.forEach(w => { if (!existing.has(w.word)) S.words.push(w); });
+            }
+            save(); render(); closeModal();
+            toast(`导入 ${data.length} 词`);
+        } catch (err) { toast('解析失败', 'err'); }
+    };
+    r.readAsText(f);
+}
+
+// Utility
+function save() { localStorage.setItem('vocabMasterData', JSON.stringify(S.words)); }
+function toast(m, t = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = m; el.className = 'toast ' + t;
+    setTimeout(() => el.classList.add('show'), 10);
+    setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// Events
+document.getElementById('btnAdd').onclick = addWord;
+document.getElementById('wordIn').onkeypress = e => { if (e.key === 'Enter') addWord(); };
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => switchMode(t.dataset.m));
+document.getElementById('fc').onclick = () => document.getElementById('fc').classList.toggle('flipped');
+document.getElementById('btnExport').onclick = exportData;
+document.getElementById('btnImport').onclick = openImportModal;
+document.querySelectorAll('.modal-opt').forEach(el => el.onclick = () => {
+    document.querySelectorAll('.modal-opt').forEach(x => x.classList.remove('active'));
+    el.classList.add('active'); S.importMode = el.dataset.mode;
+});
+
+// Init
+render();
+</script>
+</body>
+</html>

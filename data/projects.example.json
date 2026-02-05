@@ -1,0 +1,13 @@
+{
+  "projects": [
+    {
+      "id": "example-nextjs-app",
+      "name": "My Next.js App",
+      "path": "/path/to/your/project",
+      "tech": ["Next.js", "TypeScript", "Tailwind"],
+      "priority": 1,
+      "status": "active",
+      "description": "Your project description here"
+    }
+  ]
+}

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Trainer — 词汇训练器</title>
+    <meta name="description" content="AI 驱动的英语词汇学习工具">
+
+    <!-- Typography: Crimson Pro (display) + DM Sans (body) + Source Code Pro (phonetics) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* 🎨 Educational & Warm Palette */
+            --bg-deep: #0F1419;
+            --bg-surface: #1A1F26;
+            --bg-card: #242B35;
+            --bg-hover: #2E3744;
+            
+            /* Accent - Warm Coral & Mint (Educational) */
+            --accent-primary: #FF7F6B;
+            --accent-secondary: #5FCFB5;
+            --accent-tertiary: #9B8AFF;
+            
+            /* Text */
+            --text-primary: #F5F7FA;
+            --text-secondary: #9BA3AF;
+            --text-muted: #5D6570;
+            
+            /* Borders */
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-base: rgba(255, 255, 255, 0.1);
+            
+            /* Gradients */
+            --gradient-warm: linear-gradient(135deg, #FF7F6B 0%, #FFB347 100%);
+            --gradient-cool: linear-gradient(135deg, #5FCFB5 0%, #4BA8FF 100%);
+            --gradient-glow: linear-gradient(180deg, rgba(255, 127, 107, 0.08) 0%, transparent 100%);
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.25);
+            --shadow-glow: 0 0 40px rgba(255, 127, 107, 0.15);
+            
+            /* Typography */
+            --font-display: 'Crimson Pro', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'Source Code Pro', monospace;
+            
+            /* Layout */
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === Background Atmosphere === */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .atmosphere::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(255, 127, 107, 0.08) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        .atmosphere::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -5%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(95, 207, 181, 0.06) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: float 25s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        /* === Layout === */
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 40px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+            min-height: 100vh;
+        }
+
+        /* === Header === */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-warm);
+            border-radius: var(--radius-md);
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+            position: relative;
+        }
+
+        .logo-text h1 {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: var(--gradient-warm);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-base);
+            border-radius: var(--radius-sm);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .btn-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* === Main Content === */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* === Input Section === */
+        .input-section {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-warm);
+        }
+
+        .input-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .input-header h2 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-header .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(95, 207, 181, 0.15);
+            color: var(--accent-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .word-input {
+            width: 100%;
+            height: 64px;
+            padding: 0 24px;
+            font-size: 18px;
+            font-family: var(--font-display);
+            font-weight: 500;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .word-input::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .word-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(255, 127, 107, 0.1);
+        }
+
+        .btn-add {
+            height: 64px;
+            padding: 0 32px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--gradient-warm);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(255, 127, 107, 0.3);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        .btn-add svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* === Word Cards === */
+        .cards-section {
+            flex: 1;
+        }
+
+        .cards-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cards-header h3 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .cards-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .word-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gradient-warm);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .word-card:hover {
+            border-color: var(--border-base);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .word-card:hover::before {
+            opacity: 1;
+        }
+
+        .word-info {
+            flex: 1;
+        }
+
+        .word-text {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            margin-bottom: 4px;
+        }
+
+        .phonetic {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            color: var(--accent-secondary);
+            margin-bottom: 8px;
+        }
+
+        .definition {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .pos-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(155, 138, 255, 0.15);
+            color: var(--accent-tertiary);
+            margin-right: 8px;
+        }
+
+        /* === Play Button & Waveform === */
+        .play-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-play {
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: var(--gradient-cool);
+            color: white;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(95, 207, 181, 0.3);
+        }
+
+        .btn-play:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(95, 207, 181, 0.4);
+        }
+
+        .btn-play.playing {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .btn-play svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Waveform Animation */
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 24px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .waveform.active {
+            opacity: 1;
+        }
+
+        .wave-bar {
+            width: 3px;
+            height: 100%;
+            border-radius: 2px;
+            background: var(--accent-secondary);
+        }
+
+        .waveform.active .wave-bar {
+            animation: wave 0.8s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 70%; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 60%; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 30%; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+
+        /* === AI Panel (Sidebar) === */
+        .ai-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            height: fit-content;
+            position: sticky;
+            top: 48px;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .ai-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            background: var(--gradient-cool);
+            display: grid;
+            place-items: center;
+        }
+
+        .ai-avatar svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .ai-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ai-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .ai-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--accent-secondary);
+        }
+
+        .ai-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-secondary);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* AI Config */
+        .ai-config {
+            margin-bottom: 24px;
+        }
+
+        .config-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+        }
+
+        /* AI Response */
+        .ai-response {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .response-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .response-placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .response-placeholder p {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .response-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        .response-content h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-secondary);
+            margin: 16px 0 8px 0;
+        }
+
+        .response-content h4:first-child {
+            margin-top: 0;
+        }
+
+        .response-content p {
+            margin-bottom: 8px;
+        }
+
+        .response-content .example {
+            padding: 12px 16px;
+            background: rgba(95, 207, 181, 0.08);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--accent-secondary);
+            margin: 12px 0;
+            font-style: italic;
+        }
+
+        /* === Empty State === */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 24px;
+            opacity: 0.2;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* === Loading State === */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 40px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            animation: loadingPulse 1.4s ease-in-out infinite;
+        }
+
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadingPulse {
+            0%, 100% { transform: scale(0.6); opacity: 0.4; }
+            50% { transform: scale(1); opacity: 1; }
+        }
+
+        /* === Toast Notification === */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            border: 1px solid var(--border-base);
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--accent-secondary);
+        }
+
+        .toast.error {
+            border-color: #FF6B6B;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+
+            .ai-panel {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="atmosphere"></div>
+
+<div class="app-container">
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <path d="M8 7h8"></path>
+                    <path d="M8 11h6"></path>
+                </svg>
+            </div>
+            <div class="logo-text">
+                <h1>Vocab Trainer</h1>
+                <p>AI 驱动的词汇训练器</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-icon" title="导入词汇">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
+            <button class="btn-icon" title="导出词汇">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </button>
+            <button class="btn-icon" title="设置">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-header">
+                <h2>添加新单词</h2>
+                <span class="badge">自动音标</span>
+            </div>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        class="word-input" 
+                        id="wordInput" 
+                        placeholder="输入英语单词，例如 ephemeral..."
+                        autocomplete="off"
+                    >
+                </div>
+                <button class="btn-add" id="btnAdd">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    添加词汇
+                </button>
+            </div>
+        </div>
+
+        <!-- Word Cards -->
+        <div class="cards-section">
+            <div class="cards-header">
+                <h3>我的词汇库</h3>
+                <div class="cards-stats">
+                    <span class="stat">总计 <strong id="totalCount">0</strong> 词</span>
+                    <span class="stat">今日 <strong id="todayCount">0</strong> 词</span>
+                </div>
+            </div>
+            <div class="cards-grid" id="cardsGrid">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <h3>开始你的词汇之旅</h3>
+                    <p>在上方输入框中添加第一个单词，AI 将自动为你生成音标和释义</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Panel -->
+    <aside class="ai-panel">
+        <div class="ai-panel-header">
+            <div class="ai-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a7 7 0 0 1-7 7H10a7 7 0 0 1-7-7H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 12 2z"></path>
+                    <circle cx="10" cy="14" r="1.5"></circle>
+                    <circle cx="14" cy="14" r="1.5"></circle>
+                </svg>
+            </div>
+            <div class="ai-info">
+                <h3>AI 学习助手</h3>
+                <p>DeepSeek 驱动</p>
+            </div>
+            <div class="ai-status">
+                <span class="ai-status-dot"></span>
+                在线
+            </div>
+        </div>
+
+        <div class="ai-config">
+            <div class="config-label">API Key (可选)</div>
+            <input 
+                type="password" 
+                class="config-input" 
+                id="apiKeyInput"
+                placeholder="sk-xxxxxxxx"
+            >
+        </div>
+
+        <div class="ai-response" id="aiResponse">
+            <div class="response-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <p>点击单词卡片，AI 将为你生成<br>例句、助记法和使用场景</p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ===== State =====
+    const state = {
+        words: JSON.parse(localStorage.getItem('vocabWords') || '[]'),
+        selectedWord: null,
+        apiKey: localStorage.getItem('deepseekApiKey') || ''
+    };
+
+    // ===== DOM Elements =====
+    const wordInput = document.getElementById('wordInput');
+    const btnAdd = document.getElementById('btnAdd');
+    const cardsGrid = document.getElementById('cardsGrid');
+    const totalCount = document.getElementById('totalCount');
+    const todayCount = document.getElementById('todayCount');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const aiResponse = document.getElementById('aiResponse');
+    const toast = document.getElementById('toast');
+
+    // ===== Dictionary API (Free Dictionary API) =====
+    async function fetchWordData(word) {
+        try {
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+            if (!res.ok) throw new Error('Word not found');
+            const data = await res.json();
+            const entry = data[0];
+            
+            // Extract phonetics
+            let phonetic = entry.phonetic;
+            let audioUrl = null;
+            
+            if (entry.phonetics) {
+                for (const p of entry.phonetics) {
+                    if (p.audio && p.audio.includes('us')) {
+                        audioUrl = p.audio;
+                        if (p.text) phonetic = p.text;
+                        break;
+                    }
+                    if (p.audio && !audioUrl) {
+                        audioUrl = p.audio;
+                        if (p.text && !phonetic) phonetic = p.text;
+                    }
+                }
+            }
+            
+            // Extract meanings
+            const meanings = entry.meanings.map(m => ({
+                partOfSpeech: m.partOfSpeech,
+                definitions: m.definitions.slice(0, 2).map(d => d.definition)
+            }));
+            
+            return {
+                word: entry.word,
+                phonetic: phonetic || '/—/',
+                audio: audioUrl,
+                meanings,
+                addedAt: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error('Dictionary API error:', error);
+            throw error;
+        }
+    }
+
+    // ===== Text-to-Speech =====
+    function speak(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        speechSynthesis.speak(utterance);
+    }
+
+    function playAudio(url, element) {
+        if (url) {
+            const audio = new Audio(url);
+            audio.play();
+            
+            // Animate waveform
+            const waveform = element.querySelector('.waveform');
+            const playBtn = element.querySelector('.btn-play');
+            
+            waveform.classList.add('active');
+            playBtn.classList.add('playing');
+            
+            audio.onended = () => {
+                waveform.classList.remove('active');
+                playBtn.classList.remove('playing');
+            };
+        } else {
+            speak(element.dataset.word);
+        }
+    }
+
+    // ===== Render Functions =====
+    function renderCards() {
+        if (state.words.length === 0) {
+            cardsGrid.innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <h3>开始你的词汇之旅</h3>
+                    <p>在上方输入框中添加第一个单词，AI 将自动为你生成音标和释义</p>
+                </div>
+            `;
+            return;
+        }
+
+        cardsGrid.innerHTML = state.words.map((w, idx) => `
+            <div class="word-card" data-idx="${idx}" data-word="${w.word}">
+                <div class="word-info">
+                    <div class="word-text">${w.word}</div>
+                    <div class="phonetic">${w.phonetic}</div>
+                    <div class="definition">
+                        ${w.meanings.map(m => `
+                            <span class="pos-tag">${m.partOfSpeech}</span>
+                            ${m.definitions[0]}
+                        `).join('<br>')}
+                    </div>
+                </div>
+                <div class="play-area">
+                    <button class="btn-play" onclick="event.stopPropagation(); playAudio('${w.audio || ''}', this.closest('.word-card'))">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </button>
+                    <div class="waveform">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Update stats
+        totalCount.textContent = state.words.length;
+        const today = new Date().toDateString();
+        todayCount.textContent = state.words.filter(w => 
+            new Date(w.addedAt).toDateString() === today
+        ).length;
+    }
+
+    // ===== AI Functions =====
+    async function generateAIContent(word) {
+        const apiKey = apiKeyInput.value || state.apiKey;
+        
+        if (!apiKey) {
+            aiResponse.innerHTML = `
+                <div class="response-content">
+                    <h4>📖 例句</h4>
+                    <p class="example">"The ${word.word} beauty of cherry blossoms reminds us to cherish every moment."</p>
+                    <h4>🧠 助记法</h4>
+                    <p>将 "${word.word}" 拆解记忆...</p>
+                    <h4>💡 使用场景</h4>
+                    <p>常用于描述短暂易逝的事物，如青春、美丽、机会等。</p>
+                    <p style="color: var(--text-muted); font-size: 12px; margin-top: 16px;">
+                        ⚡ 输入 DeepSeek API Key 获取更智能的内容
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        aiResponse.innerHTML = `
+            <div class="loading">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        `;
+
+        try {
+            const response = await fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: '你是一位英语教学专家。请用中文为用户提供单词学习辅助内容，包括：1个地道例句、助记法、常见使用场景。请保持简洁生动。'
+                        },
+                        {
+                            role: 'user',
+                            content: `请为英语单词 "${word.word}" (${word.meanings[0]?.partOfSpeech}: ${word.meanings[0]?.definitions[0]}) 提供学习辅助内容。`
+                        }
+                    ],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+
+            aiResponse.innerHTML = `
+                <div class="response-content">
+                    ${formatAIResponse(content)}
+                </div>
+            `;
+
+            // Save API key
+            localStorage.setItem('deepseekApiKey', apiKey);
+            state.apiKey = apiKey;
+
+        } catch (error) {
+            console.error('AI API error:', error);
+            aiResponse.innerHTML = `
+                <div class="response-content">
+                    <p style="color: #FF6B6B;">⚠️ API 调用失败，请检查 Key 是否正确</p>
+                </div>
+            `;
+        }
+    }
+
+    function formatAIResponse(text) {
+        // Simple formatting
+        return text
+            .replace(/例句[：:]/g, '<h4>📖 例句</h4>')
+            .replace(/助记[法]?[：:]/g, '<h4>🧠 助记法</h4>')
+            .replace(/使用场景[：:]/g, '<h4>💡 使用场景</h4>')
+            .replace(/"(.+?)"/g, '<span class="example">"$1"</span>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ===== Toast =====
+    function showToast(message, type = 'success') {
+        toast.textContent = message;
+        toast.className = 'toast ' + type;
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ===== Event Listeners =====
+    btnAdd.addEventListener('click', async () => {
+        const word = wordInput.value.trim().toLowerCase();
+        if (!word) return;
+        
+        // Check duplicate
+        if (state.words.some(w => w.word === word)) {
+            showToast('该单词已存在', 'error');
+            return;
+        }
+
+        btnAdd.disabled = true;
+        btnAdd.innerHTML = `
+            <div class="loading-dot" style="background:white"></div>
+            <div class="loading-dot" style="background:white"></div>
+            <div class="loading-dot" style="background:white"></div>
+        `;
+
+        try {
+            const wordData = await fetchWordData(word);
+            state.words.unshift(wordData);
+            localStorage.setItem('vocabWords', JSON.stringify(state.words));
+            renderCards();
+            wordInput.value = '';
+            showToast(`"${word}" 已添加`);
+        } catch (error) {
+            showToast('单词未找到，请检查拼写', 'error');
+        } finally {
+            btnAdd.disabled = false;
+            btnAdd.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加词汇
+            `;
+        }
+    });
+
+    wordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') btnAdd.click();
+    });
+
+    cardsGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.word-card');
+        if (!card) return;
+        
+        const idx = parseInt(card.dataset.idx);
+        state.selectedWord = state.words[idx];
+        generateAIContent(state.selectedWord);
+    });
+
+    apiKeyInput.addEventListener('change', () => {
+        localStorage.setItem('deepseekApiKey', apiKeyInput.value);
+        state.apiKey = apiKeyInput.value;
+    });
+
+    // ===== Init =====
+    apiKeyInput.value = state.apiKey;
+    renderCards();
+</script>
+
+</body>
+</html>

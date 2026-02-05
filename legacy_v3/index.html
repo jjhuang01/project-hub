@@ -1,0 +1,1994 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Hub</title>
+    <meta name="description" content="Personal Project Index & Management" />
+
+    <!-- Typography: Inter + JetBrains Mono + Plus Jakarta Sans (Headers) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        /* Palette - Light (Serious & Professional) */
+        --bg-body: #fdfdfd;
+        --bg-sidebar: rgba(250, 250, 250, 0.95);
+        --bg-surface: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #ffffff;
+
+        --border-subtle: rgba(0, 0, 0, 0.06);
+        --border-base: rgba(0, 0, 0, 0.1);
+        --border-strong: rgba(0, 0, 0, 0.18);
+
+        --text-primary: #111827;
+        --text-secondary: #4b5563;
+        --text-tertiary: #9ca3af;
+        --text-quaternary: #d1d5db;
+
+        --accent-primary: #18181b; /* Zinc 900 */
+        --accent-inverse: #ffffff;
+        --accent-glow: rgba(24, 24, 27, 0.08);
+
+        /* Status Colors (Desaturated, Professional) */
+        --status-active-bg: #ecfdf5;
+        --status-active-text: #047857;
+        --status-active-dot: #10b981;
+
+        --status-dormant-bg: #fffbeb;
+        --status-dormant-text: #b45309;
+        --status-dormant-dot: #f59e0b;
+
+        --status-stale-bg: #fef2f2;
+        --status-stale-text: #b91c1c;
+        --status-stale-dot: #ef4444;
+
+        --status-archived-bg: #f3f4f6;
+        --status-archived-text: #4b5563;
+        --status-archived-dot: #9ca3af;
+
+        /* Shadows */
+        --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+        --shadow-sm:
+          0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        --shadow-md:
+          0 10px 15px -3px rgba(0, 0, 0, 0.04),
+          0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        --shadow-lg:
+          0 20px 25px -5px rgba(0, 0, 0, 0.06),
+          0 10px 10px -5px rgba(0, 0, 0, 0.03);
+        --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+
+        /* Layout */
+        --sidebar-width: 260px;
+        --header-height: 64px;
+        --font-ui: "Inter", system-ui, sans-serif;
+        --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        outline-color: var(--accent-primary);
+      }
+
+      body {
+        font-family: var(--font-ui);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Layout */
+      .layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        height: 100vh;
+      }
+
+      /* Typography Utilities */
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .text-mono {
+        font-family: var(--font-mono);
+      }
+      .text-sm {
+        font-size: 13px;
+      }
+      .text-xs {
+        font-size: 11px;
+      }
+      .text-secondary {
+        color: var(--text-secondary);
+      }
+      .text-tertiary {
+        color: var(--text-tertiary);
+      }
+
+      /* Sidebar - Glassmorphism */
+      .sidebar {
+        background-color: var(--bg-sidebar);
+        border-right: 1px solid var(--border-base);
+        display: flex;
+        flex-direction: column;
+        padding: 24px 16px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 20;
+      }
+
+      .logo-area {
+        padding: 0 12px 32px 12px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--accent-primary);
+        color: var(--accent-inverse);
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 4px 12px var(--accent-glow);
+      }
+
+      .logo-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .logo-text {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.1;
+      }
+      .logo-text-sub {
+        font-family: var(--font-ui);
+        font-size: 11px;
+        color: var(--text-tertiary);
+        font-weight: 500;
+        letter-spacing: 0.02em;
+      }
+
+      .nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid transparent;
+      }
+
+      .nav-item:hover {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .nav-item.active {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+        border-color: var(--border-subtle);
+      }
+
+      .nav-item svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+      }
+      .nav-item:hover svg,
+      .nav-item.active svg {
+        opacity: 1;
+      }
+
+      .nav-badge {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        background: rgba(0, 0, 0, 0.03);
+        padding: 1px 6px;
+        border-radius: 10px;
+      }
+
+      .separator {
+        height: 1px;
+        background: var(--border-base);
+        margin: 16px 12px;
+        opacity: 0.6;
+      }
+
+      /* Stats Panel - refined */
+      .stats-panel {
+        margin-top: auto;
+        padding: 20px 12px;
+        background: var(--bg-surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        box-shadow: var(--shadow-xs);
+      }
+      .stats-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+      }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .stat-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-family: var(--font-heading);
+      }
+      .stat-label {
+        font-size: 11px;
+        color: var(--text-tertiary);
+      }
+
+      .sidebar-footer {
+        padding: 20px 12px 0 12px;
+        margin-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* Main Content */
+      .main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+        background-color: var(--bg-body);
+        position: relative;
+      }
+
+      /* Header */
+      .header {
+        height: var(--header-height);
+        border-bottom: 1px solid var(--border-base);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background-color: rgba(var(--bg-body), 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .search-wrapper {
+        position: relative;
+        width: 320px;
+      }
+      .search-input {
+        width: 100%;
+        padding: 10px 12px 10px 40px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-base);
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: var(--font-ui);
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-xs);
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: var(--text-tertiary);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+      .search-input::placeholder {
+        color: var(--text-tertiary);
+      }
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-tertiary);
+        pointer-events: none;
+        width: 16px;
+        height: 16px;
+      }
+      .kbd-shortcut {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        color: var(--text-tertiary);
+        background: var(--bg-body);
+        border: 1px solid var(--border-base);
+        padding: 2px 5px;
+        border-radius: 4px;
+      }
+
+      .view-controls {
+        display: flex;
+        background-color: var(--bg-surface);
+        padding: 2px;
+        border-radius: 8px;
+        border: 1px solid var(--border-base);
+        box-shadow: var(--shadow-xs);
+      }
+
+      .view-btn {
+        background: none;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      .view-btn.active {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+      }
+      .view-btn:hover:not(.active) {
+        color: var(--text-secondary);
+      }
+
+      /* Scroll Area */
+      .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px;
+        scroll-behavior: smooth;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .section-count {
+        font-size: 11px;
+        color: var(--text-secondary);
+        background: var(--bg-surface);
+        padding: 2px 8px;
+        border-radius: 12px;
+        border: 1px solid var(--border-base);
+      }
+
+      /* Project Grid - refined */
+      .project-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 56px;
+      }
+
+      /* Card Design - Premium */
+      .card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-base);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-shadow: var(--shadow-xs);
+      }
+
+      .card:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        background-color: var(--bg-card-hover);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .status-badge.active {
+        background: var(--status-active-bg);
+        color: var(--status-active-text);
+      }
+      .status-badge.dormant {
+        background: var(--status-dormant-bg);
+        color: var(--status-dormant-text);
+      }
+      .status-badge.stale {
+        background: var(--status-stale-bg);
+        color: var(--status-stale-text);
+      }
+      .status-badge.archived {
+        background: var(--status-archived-bg);
+        color: var(--status-archived-text);
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+      .status-badge.active .status-dot {
+        background-color: var(--status-active-dot);
+      }
+      .status-badge.dormant .status-dot {
+        background-color: var(--status-dormant-dot);
+      }
+      .status-badge.stale .status-dot {
+        background-color: var(--status-stale-dot);
+      }
+      .status-badge.archived .status-dot {
+        background-color: var(--status-archived-dot);
+      }
+
+      .card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 24px;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        opacity: 0.9;
+      }
+
+      .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 11px;
+        color: var(--text-tertiary);
+        margin-bottom: 20px;
+        font-family: var(--font-mono);
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .meta-item svg {
+        width: 12px;
+        height: 12px;
+        opacity: 0.8;
+      }
+
+      .card-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .tech-stack {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .tech-pill {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        background-color: var(--bg-body);
+        padding: 3px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border-base);
+        font-family: var(--font-mono);
+      }
+
+      .icon-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+        transition: all 0.2s;
+      }
+      .icon-btn:hover {
+        color: var(--text-primary);
+        background-color: var(--bg-body);
+      }
+      .icon-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Updated Card Actions */
+      .card {
+        padding-bottom: 48px; /* Make room for actions */
+      }
+      
+      .card-actions-bar {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 8px 16px;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border-subtle);
+        display: flex; gap: 8px; justify-content: flex-end;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        opacity: 0; transform: translateY(5px);
+        transition: all 0.2s ease;
+      }
+      .card:hover .card-actions-bar { opacity: 1; transform: translateY(0); }
+      .project-list-view .card-actions-bar {
+          position: static; opacity: 1; transform: none; border: 0; padding: 0; background: transparent; width: auto;
+      }
+
+      .action-btn-mini {
+          font-size: 11px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-base);
+          background: var(--bg-body); color: var(--text-secondary); cursor: pointer;
+          display: flex; align-items: center; gap: 4px;
+      }
+      .action-btn-mini:hover { background: var(--bg-surface); border-color: var(--text-tertiary); }
+      .action-btn-mini.danger { color: var(--status-stale-text); border-color: var(--status-stale-bg); }
+      .action-btn-mini.danger:hover { background: var(--status-stale-bg); }
+
+      /* List View */
+      .project-list-view .card {
+        flex-direction: row;
+        align-items: center;
+        height: auto;
+        padding: 16px 24px;
+        gap: 32px;
+        border-radius: var(--radius-md);
+        margin-bottom: 12px;
+      }
+      .project-list-view .card-header {
+        margin: 0;
+        min-width: 120px;
+      }
+      .project-list-view .card-title {
+        margin: 0;
+        font-size: 14px;
+        width: 220px;
+        flex-shrink: 0;
+      }
+      .project-list-view .card-desc {
+        margin: 0;
+        font-size: 13px;
+        -webkit-line-clamp: 1;
+        flex: 1;
+        margin-bottom: 0;
+      }
+      .project-list-view .card-meta {
+        margin: 0;
+        width: 160px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+      }
+      .project-list-view .card-footer {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        width: auto;
+      }
+
+      /* Modal - Refined */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 50;
+        display: none;
+        place-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.open {
+        display: grid;
+        opacity: 1;
+      }
+
+      .modal {
+        background-color: var(--bg-surface);
+        width: 90%;
+        max-width: 680px;
+        border-radius: 20px;
+        border: 1px solid var(--border-base);
+        box-shadow: var(--shadow-modal);
+        padding: 40px;
+        transform: scale(0.95);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .modal-overlay.open .modal {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+      .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+      }
+
+      .modal-grid-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 40px;
+      }
+      .stat-box {
+        padding: 20px;
+        border: 1px solid var(--border-base);
+        border-radius: 12px;
+        background: var(--bg-body);
+      }
+      .stat-box-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        margin-bottom: 4px;
+      }
+      .stat-box-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary);
+        font-weight: 600;
+      }
+
+      .detail-group {
+        margin-bottom: 28px;
+      }
+      .detail-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 10px;
+      }
+      .detail-value-box {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: var(--text-secondary);
+        background-color: var(--bg-body);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border-base);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .detail-text {
+        font-size: 15px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .analysis-box {
+        background: linear-gradient(
+          to bottom right,
+          var(--bg-body),
+          var(--bg-surface)
+        );
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border-strong);
+        position: relative;
+        overflow: hidden;
+      }
+      .analysis-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--text-primary);
+        opacity: 0.2;
+      }
+
+      .modal-actions {
+        margin-top: 48px;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s;
+        font-family: var(--font-ui);
+      }
+      .btn-secondary {
+        background: var(--bg-body);
+        border: 1px solid var(--border-base);
+        color: var(--text-primary);
+      }
+      .btn-secondary:hover {
+        background: var(--bg-surface);
+        border-color: var(--text-tertiary);
+      }
+
+      .btn-primary {
+        background: var(--accent-primary);
+        border: 1px solid var(--accent-primary);
+        color: var(--accent-inverse);
+        box-shadow: 0 4px 12px var(--accent-glow);
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        opacity: 0.95;
+        box-shadow: 0 6px 16px var(--accent-glow);
+      }
+
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 100px 20px;
+        color: var(--text-tertiary);
+      }
+
+      /* Mobile */
+      @media (max-width: 768px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .header {
+          padding: 0 20px;
+        }
+        .search-wrapper {
+          width: 240px;
+        }
+      }
+    /* Web Terminal */
+    #terminalPanel {
+        position: fixed;
+        bottom: 0;
+        left: 260px; /* Sidebar width */
+        right: 0;
+        height: 300px;
+        background: #1e1e1e;
+        color: #f0f0f0;
+        font-family: 'Menlo', 'Monaco', monospace;
+        display: none;
+        flex-direction: column;
+        border-top: 1px solid #333;
+        z-index: 1000;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+    }
+    #terminalHeader {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 16px;
+        background: #2d2d2d;
+        border-bottom: 1px solid #333;
+    }
+    #terminalTitle { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    #terminalControls button { margin-left: 8px; }
+    #terminalLogs {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+    .log-stdout { color: #cccccc; }
+    .log-stderr { color: #ff6b6b; }
+    .log-info { color: #4dabf7; font-style: italic; }
+    .terminal-badge {
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #ccc;
+    }
+    .terminal-badge.active { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+              />
+            </svg>
+          </div>
+          <div>
+            <div class="logo-text">Project Hub</div>
+            <div class="logo-text-sub">Workspace v2.2</div>
+          </div>
+        </div>
+
+        <nav class="nav-list" id="navList"></nav>
+
+        <div class="stats-panel" id="statsPanel">
+          <div class="stats-title">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+            Overview
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" id="statTotal">0</div>
+              <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statActive">0</div>
+              <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statDormant">0</div>
+              <div class="stat-label">Dormant</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statValue">0</div>
+              <div class="stat-label">Value</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="text-xs text-tertiary text-mono">Local Environment</div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <header class="header">
+          <div class="search-wrapper">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              class="search-input"
+              id="search"
+              placeholder="Search projects..."
+            />
+            <div class="kbd-shortcut">⌘K</div>
+          </div>
+
+          <div class="view-controls">
+            <button class="view-btn active" data-view="grid">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button class="view-btn" data-view="list">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="scroll-area">
+          <div id="content"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle">Project</div>
+          <button class="icon-btn" onclick="closeModal()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-grid-stats">
+          <div class="stat-box">
+            <div class="stat-box-value" id="modalDays">-</div>
+            <div class="stat-box-label">Last Active</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-value" id="modalPriority">-</div>
+            <div class="stat-box-label">Priority Level</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-value" id="modalValueDisplay">-</div>
+            <div class="stat-box-label">Business Value</div>
+          </div>
+        </div>
+
+        <div class="detail-group">
+          <div class="detail-label">Description</div>
+          <div class="detail-text" id="modalDesc"></div>
+        </div>
+
+        <div class="detail-group">
+          <div class="detail-label">System Path</div>
+          <div class="detail-value-box">
+            <span
+              id="modalPath"
+              style="
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-right: 10px;
+              "
+            ></span>
+            <button
+              class="icon-btn"
+              style="height: 20px; width: 20px"
+              onclick="copyPath()"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="detail-group" id="remoteSection">
+          <div class="detail-label">Repository</div>
+          <div class="detail-value-box">
+            <a
+              href="#"
+              id="modalRemote"
+              target="_blank"
+              style="
+                color: var(--text-primary);
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              "
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+                ></path>
+              </svg>
+              <span id="modalRemoteText"></span>
+            </a>
+          </div>
+        </div>
+
+        <div class="detail-group">
+          <div class="detail-label">Technologies</div>
+          <div class="tech-stack" id="modalTech"></div>
+        </div>
+
+        <div class="detail-group" id="quickRunSection">
+          <div class="detail-label">快速运行</div>
+            <div
+              class="detail-value-box"
+              style="flex-direction: column; gap: 12px; align-items: stretch"
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <code
+                  id="runCommand"
+                  style="
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                ></code>
+              </div>
+
+              <!-- Port Status -->
+              <div
+                id="portStatusArea"
+                style="
+                  display: flex;
+                  gap: 8px;
+                  font-size: 11px;
+                  color: var(--text-tertiary);
+                  margin-bottom: 8px;
+                "
+              >
+                <span id="portStatusText">Checking ports...</span>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+              <code
+                id="runCommand"
+                style="
+                  font-size: 12px;
+                  color: var(--text-secondary);
+                  flex: 1;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              ></code>
+            </div>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="btn btn-secondary"
+                style="flex: 1; font-size: 12px; padding: 8px 12px"
+                onclick="copyRunCommand()"
+              >
+                📋 复制命令
+              </button>
+              <button
+                class="btn btn-secondary"
+                id="runStatusBtn"
+                style="flex: 1; font-size: 12px; padding: 8px 12px"
+                onclick="toggleRunStatus()"
+              >
+                ▶️ 标记运行中
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-group" id="analysisSection">
+          <div class="detail-label">AI Insights</div>
+          <div class="analysis-box" id="modalAnalysis"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="openInTerminal()">
+            Terminal
+          </button>
+          <button class="btn btn-primary" onclick="closeModal()">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Panel -->
+    <div id="terminalPanel">
+        <div id="terminalHeader">
+            <div id="terminalTitle">
+                <span class="terminal-badge" id="termBadge"></span>
+                <span id="termName">No Process</span>
+            </div>
+            <div id="terminalControls">
+                <button class="action-btn-mini danger" id="termStopBtn">🛑 Stop</button>
+                <button class="action-btn-mini" onclick="document.getElementById('terminalPanel').style.display='none'">🔽 Hide</button>
+            </div>
+        </div>
+        <div id="terminalLogs"></div>
+    </div>
+    
+    <script>
+      // Icons
+      const Icons = {
+        home: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+        work: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+        personal:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+        study:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+        tools:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>',
+        external:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
+        archived:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>',
+        default:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+        alert:
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+        copy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+        calendar:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+        chart:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>',
+      };
+
+      const state = {
+        projects: [],
+        categories: {},
+        analysisData: {},
+        runningProjects: JSON.parse(
+          localStorage.getItem("runningProjects") || "{}",
+        ),
+        filter: "all",
+        view: "grid",
+        search: "",
+      };
+
+      // 保存运行状态到 localStorage
+      function saveRunningProjects() {
+        localStorage.setItem(
+          "runningProjects",
+          JSON.stringify(state.runningProjects),
+        );
+      }
+
+      // Initialization
+      async function init() {
+        try {
+          const res = await fetch("./data/projects.json");
+          const json = await res.json();
+          state.projects = json.projects;
+          state.categories = json.categories;
+          await loadAnalysisData();
+          renderNav();
+          renderStats();
+          renderContent();
+          // initTheme(); // Removed for light-only mode
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function loadAnalysisData() {
+        try {
+          const progressRes = await fetch("./data/analysis/_progress.json");
+          const progress = await progressRes.json();
+          for (const id of progress.analyzedProjects || []) {
+            try {
+              const res = await fetch(`./data/analysis/${id}.json`);
+              state.analysisData[id] = await res.json();
+            } catch (e) {}
+          }
+        } catch (e) {}
+      }
+
+      // Render Helpers
+      function renderNav() {
+        const list = document.getElementById("navList");
+        const total = state.projects.length;
+        let html = `
+            <div class="nav-item active" onclick="setFilter('all', this)">
+                ${Icons.home} <span>All Projects</span> <span class="nav-badge">${total}</span>
+            </div>
+            <div class="separator"></div>
+        `;
+
+        ["work", "personal", "tools", "study", "external", "archived"].forEach(
+          (key) => {
+            const count = state.projects.filter(
+              (p) => p.category === key,
+            ).length;
+            if (count > 0) {
+              const name = key.charAt(0).toUpperCase() + key.slice(1);
+              html += `
+                    <div class="nav-item" onclick="setFilter('${key}', this)">
+                        ${Icons[key] || Icons.default} <span>${name}</span> <span class="nav-badge">${count}</span>
+                    </div>
+                `;
+            }
+          },
+        );
+
+        const archiveCount = state.projects.filter(
+          (p) => p.suggestArchive,
+        ).length;
+        const runningCount = Object.keys(state.runningProjects).length;
+
+        html += `<div class="separator"></div>`;
+
+        if (runningCount > 0) {
+          html += `
+                <div class="nav-item" onclick="setFilter('running', this)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>运行中</span> <span class="nav-badge" style="color:var(--status-active-text)">${runningCount}</span>
+                </div>
+            `;
+        }
+
+        if (archiveCount > 0) {
+          html += `
+                <div class="nav-item" onclick="setFilter('suggest-archive', this)">
+                    ${Icons.alert} <span>Suggested Archive</span> <span class="nav-badge" style="color:var(--status-stale-text)">${archiveCount}</span>
+                </div>
+            `;
+        }
+        list.innerHTML = html;
+      }
+
+      function renderStats() {
+        const total = state.projects.length;
+        const active = state.projects.filter(
+          (p) => p.status === "active",
+        ).length;
+        const dormant = state.projects.filter((p) =>
+          ["dormant", "stale"].includes(p.status),
+        ).length;
+
+        let totalValue = 0;
+        Object.values(state.analysisData).forEach((a) => {
+          totalValue += a.businessValue?.total || 0;
+        });
+
+        document.getElementById("statTotal").textContent = total;
+        document.getElementById("statActive").textContent = active;
+        document.getElementById("statDormant").textContent = dormant;
+        document.getElementById("statValue").textContent =
+          totalValue > 0 ? totalValue : "-";
+      }
+
+      window.setFilter = (cat, el) => {
+        state.filter = cat;
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((i) => i.classList.remove("active"));
+        el.classList.add("active");
+        renderContent();
+      };
+
+      function renderContent() {
+        const container = document.getElementById("content");
+        const query = state.search.toLowerCase();
+        let projects = state.projects;
+
+        if (query) {
+          projects = projects.filter(
+            (p) =>
+              p.name.toLowerCase().includes(query) ||
+              (p.description || "").toLowerCase().includes(query),
+          );
+        } else if (state.filter === "suggest-archive") {
+          projects = projects.filter((p) => p.suggestArchive);
+        } else if (state.filter === "running") {
+          projects = projects.filter((p) => state.runningProjects[p.id]);
+        } else if (state.filter !== "all") {
+          projects = projects.filter((p) => p.category === state.filter);
+        }
+
+        const groups = {};
+        if (state.filter !== "all" || query) {
+          groups[
+            state.filter === "suggest-archive"
+              ? "Suggested Archive"
+              : query
+                ? "Search Results"
+                : "Projects"
+          ] = projects;
+        } else {
+          [
+            "work",
+            "personal",
+            "tools",
+            "study",
+            "external",
+            "archived",
+          ].forEach((k) => {
+            const sub = projects.filter((p) => p.category === k);
+            if (sub.length)
+              groups[k.charAt(0).toUpperCase() + k.slice(1)] = sub;
+          });
+        }
+
+        let html = "";
+        for (const [title, list] of Object.entries(groups)) {
+          if (!list.length) continue;
+          html += `
+                <div class="section-header">
+                    <div class="section-title">${title} <span class="section-count">${list.length}</span></div>
+                </div>
+                <div class="project-grid ${state.view === "list" ? "project-list-view" : ""}">
+                    ${list.map((p) => renderCard(p)).join("")}
+                </div>
+            `;
+        }
+        container.innerHTML =
+          html || `<div class="empty-state">No projects found.</div>`;
+      }
+
+      function renderCard(p) {
+        const analysis = state.analysisData[p.id];
+        const status = analysis?.activity?.level || p.status;
+        const days = getDaysSince(p.lastCommit);
+        const val = analysis?.businessValue?.total;
+
+        const isRunning = !!state.runningProjects[p.id];
+        
+        // Quick Actions HTML
+        const actionsHtml = `
+            <div class="card-actions-bar">
+                <button class="action-btn-mini" onclick="event.stopPropagation(); copyRunCommandById('${p.id}', this)" title="Copy Run Command">
+                    ▶️ Run
+                </button>
+                <button class="action-btn-mini" onclick="event.stopPropagation(); copyPathById('${p.id}', this)" title="Copy Path">
+                    📂 Path
+                </button>
+            </div>
+        `;
+
+        return `
+            <div class="card" onclick="openModal('${p.id}')" style="${isRunning ? "border-color:var(--status-active-dot);" : ""}">
+                <div class="card-header">
+                    <div class="status-badge ${status}">
+                        <div class="status-dot"></div>
+                        <span>${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px;">
+                        ${isRunning ? '<span style="font-size:10px;color:var(--status-active-text);background:var(--status-active-bg);padding:2px 6px;border-radius:4px;">🟢 运行中</span>' : ""}
+                    </div>
+                </div>
+                <div class="card-title">${p.name}</div>
+                <div class="card-desc">${p.description || "No description"}</div>
+                <div class="card-meta">
+                    <span class="meta-item">${Icons.calendar} ${days !== null ? days + "d" : "-"}</span>
+                    ${val ? `<span class="meta-item">${Icons.chart} ${val}/25</span>` : ""}
+                </div>
+                <div class="card-footer">
+                    <div class="tech-stack">
+                        ${(p.tech || [])
+                          .slice(0, 3)
+                          .map((t) => `<span class="tech-pill">${t}</span>`)
+                          .join("")}
+                        ${(p.tech || []).length > 3 ? `<span class="tech-pill">+${p.tech.length - 3}</span>` : ""}
+                    </div>
+                </div>
+                ${actionsHtml}
+            </div>
+        `;
+      }
+
+      // Modal
+      let currentProject = null;
+      window.openModal = (id) => {
+        const p = state.projects.find((x) => x.id === id);
+        if (!p) return;
+        currentProject = p;
+
+        const analysis = state.analysisData[id];
+
+        document.getElementById("modalTitle").innerText = p.name;
+        document.getElementById("modalDesc").innerText =
+          p.description || "No description provided.";
+        document.getElementById("modalPath").innerText = p.path;
+
+        document.getElementById("modalDays").innerText =
+          getDaysSince(p.lastCommit) ?? "-";
+        document.getElementById("modalPriority").innerText = p.priority
+          ? `P${p.priority}`
+          : "-";
+        document.getElementById("modalValueDisplay").innerText = analysis
+          ?.businessValue?.total
+          ? `${analysis.businessValue.total}/25`
+          : "-";
+
+        const remoteDiv = document.getElementById("remoteSection");
+        if (p.remote) {
+          remoteDiv.classList.remove("hidden");
+          document.getElementById("modalRemote").href = formatRemote(p.remote);
+          document.getElementById("modalRemoteText").innerText = p.remote;
+        } else {
+          remoteDiv.classList.add("hidden");
+        }
+
+        document.getElementById("modalTech").innerHTML = (p.tech || [])
+          .map((t) => `<span class="tech-pill">${t}</span>`)
+          .join("");
+
+        // Set Run Command
+        document.getElementById("runCommand").innerText = detectRunCommand(p);
+        checkPortsForProject(p);
+        updateRunStatusBtn();
+
+        const anaDiv = document.getElementById("analysisSection");
+        if (analysis?.recommendation) {
+          anaDiv.classList.remove("hidden");
+          document.getElementById("modalAnalysis").innerHTML = `
+                <div style="font-weight:600;margin-bottom:8px;color:var(--text-primary)">${analysis.recommendation.summary}</div>
+                ${(analysis.recommendation.nextSteps || []).map((s) => `<div style="font-size:13px;color:var(--text-secondary);margin-top:4px;display:flex;gap:6px;"><span>•</span><span>${s}</span></div>`).join("")}
+            `;
+        } else {
+          anaDiv.classList.add("hidden");
+        }
+
+        document.getElementById("modal").classList.add("open");
+      };
+
+      window.closeModal = () =>
+        document.getElementById("modal").classList.remove("open");
+
+      // Utilities
+      function getDaysSince(dateStr) {
+        if (!dateStr) return null;
+        return Math.floor((new Date() - new Date(dateStr)) / 86400000);
+      }
+
+      function formatRemote(url) {
+        if (!url) return "#";
+        if (url.startsWith("http")) return url;
+        if (url.startsWith("git@"))
+          return url
+            .replace(":", "/")
+            .replace("git@", "https://")
+            .replace(".git", "");
+        return url;
+      }
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+      }
+      window.copyPath = () =>
+        currentProject && copyToClipboard(currentProject.path);
+      window.openInTerminal = () =>
+        currentProject && copyToClipboard(`cd "${currentProject.path}"`);
+
+      // 快速运行功能
+      function detectRunCommand(project) {
+        const tech = project.tech || [];
+        const techStr = tech.join(",").toLowerCase();
+
+        // 优先匹配 NestJS -> npm run start:dev
+        if (techStr.includes("nest") || project.id === 'yq-server') {
+          return `cd "${project.path}" && npm run start:dev`;
+        }
+        
+        // 检测技术栈推断运行命令
+        if (
+          techStr.includes("vite") ||
+          techStr.includes("vue") ||
+          techStr.includes("react") ||
+          techStr.includes("next")
+        ) {
+          return `cd "${project.path}" && npm run dev`;
+        }
+        if (
+          techStr.includes("node") ||
+          techStr.includes("typescript") ||
+          techStr.includes("express")
+        ) {
+          return `cd "${project.path}" && npm start`;
+        }
+        if (techStr.includes("python") || techStr.includes("jupyter")) {
+          return `cd "${project.path}" && python main.py`;
+        }
+        if (
+          techStr.includes("html") ||
+          techStr.includes("css") ||
+          techStr.includes("javascript")
+        ) {
+          return `cd "${project.path}" && npx -y serve . -p 3030`;
+        }
+        if (techStr.includes("docker")) {
+          return `cd "${project.path}" && docker-compose up`;
+        }
+        if (techStr.includes("flutter") || techStr.includes("dart")) {
+          return `cd "${project.path}" && flutter run`;
+        }
+        // Default
+        return `cd "${project.path}" && npm start`;
+      }
+      
+      // --- Process Manager v3.0 Logic ---
+      class ProcessManager {
+          constructor() {
+              this.activeProcessId = null;
+              this.evtSource = null;
+          }
+
+          async start(id, btn) {
+              const p = state.projects.find(x => x.id === id);
+              if (!p) return;
+              
+              // Get Command
+              let fullCmd = detectRunCommand(p);
+              let cmd = '';
+              // Extract actual command from "cd path && cmd"
+              if (fullCmd.includes(' && ')) {
+                  cmd = fullCmd.split(' && ')[1];
+              } else {
+                  cmd = fullCmd; // Fallback
+              }
+              
+              if(btn) {
+                   const originalText = btn.innerHTML;
+                   btn.innerHTML = '⏳';
+                   setTimeout(() => btn.innerHTML = originalText, 2000);
+              }
+
+              // Call API
+              try {
+                  const res = await fetch('/api/process/start', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({ id: p.id, path: p.path, cmd: cmd })
+                  });
+                  const json = await res.json();
+                  if(json.error) {
+                      alert('Start Failed: ' + json.error);
+                  } else {
+                      this.openTerminal(id);
+                      state.runningProjects[id] = true;
+                      saveRunningProjects();
+                      renderContent(); // Update UI badges
+                  }
+              } catch(e) {
+                  alert('Network Error');
+              }
+          }
+
+          async stop(id) {
+             if(!confirm('Stop process?')) return;
+             try {
+                  await fetch('/api/process/stop', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({ id })
+                  });
+                  // UI update handled by SSE or manual?
+                  // Provide immediate feedback
+                  if(this.activeProcessId === id) {
+                      document.getElementById('termBadge').classList.remove('active');
+                  }
+                  delete state.runningProjects[id];
+                  saveRunningProjects();
+                  renderContent();
+             } catch(e) { alert('Stop Failed'); }
+          }
+
+          openTerminal(id) {
+              const p = state.projects.find(x => x.id === id);
+              this.activeProcessId = id;
+              
+              const panel = document.getElementById('terminalPanel');
+              panel.style.display = 'flex';
+              document.getElementById('termName').textContent = p ? p.name : id;
+              document.getElementById('termBadge').classList.add('active'); // Assume active
+              
+              const stopBtn = document.getElementById('termStopBtn');
+              stopBtn.onclick = () => this.stop(id);
+
+              if (this.evtSource) this.evtSource.close();
+              const logsDiv = document.getElementById('terminalLogs');
+              logsDiv.innerHTML = '<div class="log-info">Connecting to logs...</div>';
+              
+              this.evtSource = new EventSource(`/api/process/logs/${id}`);
+              this.evtSource.onmessage = (e) => {
+                  try {
+                      const msg = JSON.parse(e.data);
+                      // Simple ANSI strip
+                      const cleanText = msg.text.replace(/\x1b\[[0-9;]*m/g, '');
+                      
+                      const line = document.createElement('div');
+                      line.className = `log-${msg.type}`;
+                      line.textContent = `[${new Date(msg.time).toLocaleTimeString()}] ${cleanText}`;
+                      logsDiv.appendChild(line);
+                      logsDiv.scrollTop = logsDiv.scrollHeight;
+                  } catch(err) {}
+              };
+              this.evtSource.onerror = () => {
+                  const line = document.createElement('div');
+                  line.className = 'log-info';
+                  line.textContent = '[Connection Closed]';
+                  logsDiv.appendChild(line);
+                  document.getElementById('termBadge').classList.remove('active');
+                  this.evtSource.close();
+              };
+          }
+      }
+
+      const processMgr = new ProcessManager();
+      
+      // Override global actions
+      window.copyRunCommandById = (id, btn) => {
+          // Changed behavior: This is now "Run Background"
+          processMgr.start(id, btn);
+      };
+
+      window.copyRunCommand = () => {
+        if (!currentProject) return;
+        const cmd = detectRunCommand(currentProject);
+        copyToClipboard(cmd);
+        // 短暂反馈
+        const btn = document.querySelector("#quickRunSection .btn");
+        if (btn) {
+          btn.textContent = "✅ 已复制";
+          setTimeout(() => (btn.textContent = "📋 复制命令"), 1500);
+        }
+      };
+
+      window.toggleRunStatus = () => {
+        if (!currentProject) return;
+        const id = currentProject.id;
+        if (state.runningProjects[id]) {
+          delete state.runningProjects[id];
+        } else {
+          state.runningProjects[id] = { startedAt: new Date().toISOString() };
+        }
+        saveRunningProjects();
+        updateRunStatusBtn();
+        renderNav();
+        renderContent();
+      };
+
+      function updateRunStatusBtn() {
+        const btn = document.getElementById("runStatusBtn");
+        if (!btn || !currentProject) return;
+        const isRunning = !!state.runningProjects[currentProject.id];
+        btn.textContent = isRunning ? "⏹️ 标记停止" : "▶️ 标记运行中";
+        btn.style.background = isRunning ? "var(--status-active-bg)" : "";
+        btn.style.color = isRunning ? "var(--status-active-text)" : "";
+      }
+
+      // 端口检测逻辑
+      const COMMON_PORTS = [
+        3000, 3001, 3002, 5173, 5174, 8080, 8000, 4200, 3030,
+      ];
+
+      async function checkPortOccupied(port) {
+        try {
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), 300);
+
+          await fetch(`http://localhost:${port}`, {
+            mode: "no-cors",
+            signal: controller.signal,
+          });
+          clearTimeout(id);
+          return true;
+        } catch (e) {
+          if (e.name === "AbortError") return true;
+          return false;
+        }
+      }
+
+      async function checkPortsForProject(project) {
+        const area = document.getElementById("portStatusText");
+        if (!area) return;
+        area.innerHTML = "Scanning ports...";
+
+        const occupied = [];
+        for (const port of COMMON_PORTS) {
+          const isOccupied = await checkPortOccupied(port);
+          if (isOccupied) occupied.push(port);
+        }
+
+        let html = "";
+        if (occupied.length > 0) {
+          html = `<span style="color:var(--status-stale-text)">⚠️ Used: ${occupied.join(", ")}</span>`;
+        } else {
+          html = `<span style="color:var(--status-active-text)">✅ Common ports free</span>`;
+        }
+
+        // 尝试推断该项目可能使用的端口
+        let likelyPort = null;
+        const cmd = detectRunCommand(project);
+        if (cmd.includes("3000")) likelyPort = 3000;
+        else if (cmd.includes("5173")) likelyPort = 5173;
+        else if (cmd.includes("8080")) likelyPort = 8080;
+        else if (cmd.includes("3030")) likelyPort = 3030;
+
+        if (likelyPort) {
+          const isLikelyOccupied = occupied.includes(likelyPort);
+          const color = isLikelyOccupied
+            ? "var(--status-stale-text)"
+            : "var(--status-active-text)";
+          const icon = isLikelyOccupied ? "🚫" : "🟢";
+          html += ` <span style="margin-left:8px;border-left:1px solid var(--border-base);padding-left:8px;color:${color}">${icon} Target: ${likelyPort}</span>`;
+          
+          // Add Kill Button if occupied
+          if(isLikelyOccupied) {
+              html += `<button class="action-btn-mini danger" style="margin-left:8px;" onclick="copyKillCommand(${likelyPort})">☠️ Kill</button>`;
+          }
+        }
+
+        area.innerHTML = html;
+      }
+
+      // Quick Actions Helpers
+      // Quick Actions Helpers (API + Fallback)
+      async function callServerApi(endpoint, body) {
+          try {
+              const res = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify(body)
+              });
+              return res.ok;
+          } catch(e) {
+              return false;
+          }
+      }
+
+      window.copyRunCommandById = async (id, btn) => {
+          const p = state.projects.find(x => x.id === id);
+          if(!p) return;
+          
+          const cmd = detectRunCommand(p);
+          
+          // Try Server Run
+          const success = await callServerApi('/api/run-project', { path: p.path, cmd: cmd });
+          
+          if (success) {
+              if(btn) showBtnFeedback(btn, '🚀 Launched');
+          } else {
+              // Fallback
+              copyToClipboard(cmd);
+              if(btn) showBtnFeedback(btn, '📋 Copied');
+          }
+      };
+
+      window.copyPathById = async (id, btn) => {
+          const p = state.projects.find(x => x.id === id);
+          if(!p) return;
+          
+          const success = await callServerApi('/api/open-folder', { path: p.path });
+          
+          if (success) {
+               if(btn) showBtnFeedback(btn, '📂 Opened');
+          } else {
+               copyToClipboard(p.path);
+               if(btn) showBtnFeedback(btn, '📋 Copied');
+          }
+      };
+      
+      function showBtnFeedback(btn, text) {
+          const original = btn.innerHTML;
+          btn.innerHTML = text;
+          btn.style.color = 'var(--status-active-text)';
+          setTimeout(() => {
+              btn.innerHTML = original;
+              btn.style.color = '';
+          }, 1500);
+      }
+      
+      // Kill Port Command
+      window.copyKillCommand = async (port, btn) => {
+          // Server Kill
+          const success = await callServerApi('/api/kill-port', { port: port });
+          
+          if (success) {
+              alert(`Port ${port} freed successfully!`);
+              if(btn) showBtnFeedback(btn, '☠️ Killed');
+              checkPortsForProject(currentProject); // Refresh status
+          } else {
+              const cmd = `lsof -t -i:${port} | xargs kill -9`;
+              copyToClipboard(cmd);
+              alert(`Copied kill command for port ${port}:\n${cmd}`);
+          }
+      };
+
+      // Listeners
+      document.getElementById("search").addEventListener("input", (e) => {
+        state.search = e.target.value;
+        renderContent();
+      });
+      document.querySelectorAll(".view-btn").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".view-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.view = btn.dataset.view;
+          renderContent();
+        }),
+      );
+
+      // Removed theme toggle listeners and functions
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+        
+        // Search Focus
+        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+          e.preventDefault();
+          document.getElementById("search").focus();
+        }
+
+        // Quick Run (Cmd+Enter)
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+           if(document.getElementById('modal').classList.contains('open') && currentProject) {
+               window.copyRunCommand();
+           }
+        }
+      });
+
+      init();
+    </script>
+  </body>
+</html>

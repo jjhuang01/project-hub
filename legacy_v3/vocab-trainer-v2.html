@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Master — 词汇大师 v2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0F1419; --bg-surface: #1A1F26; --bg-card: #242B35; --bg-hover: #2E3744;
+            --accent-coral: #FF7F6B; --accent-mint: #5FCFB5; --accent-purple: #9B8AFF; --accent-gold: #FFD93D;
+            --text-primary: #F5F7FA; --text-secondary: #9BA3AF; --text-muted: #5D6570;
+            --border-subtle: rgba(255,255,255,0.06); --border-base: rgba(255,255,255,0.1);
+            --font-display: 'Crimson Pro', serif; --font-body: 'DM Sans', sans-serif; --font-mono: 'Source Code Pro', monospace;
+            --radius-md: 14px; --radius-lg: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; }
+        
+        /* Layout */
+        .app { display: grid; grid-template-columns: 280px 1fr 360px; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { background: var(--bg-surface); border-right: 1px solid var(--border-subtle); padding: 24px; display: flex; flex-direction: column; }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+        .logo-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-coral), #FFB347); border-radius: 12px; display: grid; place-items: center; }
+        .logo-icon svg { width: 24px; height: 24px; color: white; }
+        .logo h1 { font-family: var(--font-display); font-size: 22px; background: linear-gradient(135deg, var(--accent-coral), #FFB347); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Stats */
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: var(--bg-card); border-radius: 12px; padding: 16px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--accent-mint); }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+        
+        /* Streak */
+        .streak-card { background: linear-gradient(135deg, rgba(255,217,61,0.15), rgba(255,127,107,0.1)); border: 1px solid rgba(255,217,61,0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: center; }
+        .streak-value { font-size: 42px; font-weight: 700; color: var(--accent-gold); }
+        .streak-label { font-size: 13px; color: var(--text-secondary); }
+        .streak-fire { font-size: 24px; }
+        
+        /* Tags */
+        .tags-section h3 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-base); background: var(--bg-card); color: var(--text-secondary); }
+        .tag:hover, .tag.active { background: var(--accent-coral); color: white; border-color: var(--accent-coral); }
+        .tag-count { opacity: 0.7; margin-left: 4px; }
+        
+        /* Main Content */
+        .main { padding: 32px; overflow-y: auto; }
+        
+        /* Mode Tabs */
+        .mode-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .mode-tab { padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+        .mode-tab:hover { border-color: var(--border-base); }
+        .mode-tab.active { background: var(--accent-coral); color: white; border-color: var(--accent-coral); }
+        
+        /* Input */
+        .input-section { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; border: 1px solid var(--border-subtle); }
+        .input-group { display: flex; gap: 12px; }
+        .input-wrapper { flex: 1; position: relative; }
+        .word-input { width: 100%; height: 56px; padding: 0 20px; font-size: 16px; font-family: var(--font-display); background: var(--bg-card); border: 2px solid var(--border-subtle); border-radius: 12px; color: var(--text-primary); }
+        .word-input:focus { outline: none; border-color: var(--accent-coral); }
+        .btn-add { height: 56px; padding: 0 28px; font-size: 14px; font-weight: 600; background: linear-gradient(135deg, var(--accent-coral), #FFB347); border: none; border-radius: 12px; color: white; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,127,107,0.3); }
+        
+        /* Tag Select */
+        .tag-select { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+        .tag-select label { font-size: 12px; color: var(--text-muted); }
+        .tag-select select { padding: 8px 12px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 13px; }
+        
+        /* Word Cards List */
+        .cards-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cards-header h2 { font-family: var(--font-display); font-size: 20px; }
+        .cards-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        /* Word Card */
+        .word-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: all 0.3s; }
+        .word-card:hover { border-color: var(--border-base); transform: translateX(8px); }
+        .word-card.mastered { border-left: 4px solid var(--accent-mint); }
+        .word-card.learning { border-left: 4px solid var(--accent-gold); }
+        .word-card.new { border-left: 4px solid var(--accent-purple); }
+        .word-info { flex: 1; }
+        .word-text { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .phonetic { font-family: var(--font-mono); font-size: 14px; color: var(--accent-mint); margin-bottom: 6px; }
+        .phonetic .source { font-size: 10px; background: rgba(95,207,181,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+        .definition { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .pos-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(155,138,255,0.2); color: var(--accent-purple); margin-right: 6px; }
+        .word-tag { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: var(--bg-card); color: var(--text-muted); margin-top: 8px; display: inline-block; }
+        
+        /* Play Button */
+        .play-btn { width: 48px; height: 48px; border: none; border-radius: 50%; background: linear-gradient(135deg, var(--accent-mint), #4BA8FF); color: white; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
+        .play-btn:hover { transform: scale(1.1); }
+        .play-btn svg { width: 20px; height: 20px; }
+        
+        /* Flashcard Mode */
+        .flashcard-container { display: none; perspective: 1000px; }
+        .flashcard-container.active { display: block; }
+        .flashcard { width: 100%; max-width: 500px; height: 320px; margin: 0 auto 24px; position: relative; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .flashcard-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
+        .flashcard-front { background: linear-gradient(135deg, var(--bg-surface), var(--bg-card)); border: 1px solid var(--border-base); }
+        .flashcard-back { background: linear-gradient(135deg, rgba(95,207,181,0.1), rgba(75,168,255,0.1)); border: 1px solid var(--accent-mint); transform: rotateY(180deg); }
+        .flashcard-word { font-family: var(--font-display); font-size: 42px; font-weight: 700; margin-bottom: 12px; }
+        .flashcard-phonetic { font-family: var(--font-mono); font-size: 18px; color: var(--accent-mint); }
+        .flashcard-definition { font-size: 18px; color: var(--text-primary); text-align: center; line-height: 1.6; }
+        .flashcard-hint { font-size: 13px; color: var(--text-muted); margin-top: 16px; }
+        
+        /* Flashcard Controls */
+        .flashcard-controls { display: flex; justify-content: center; gap: 16px; margin-top: 24px; }
+        .fc-btn { padding: 14px 28px; border-radius: 12px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
+        .fc-btn.hard { background: #FF6B6B; color: white; }
+        .fc-btn.good { background: var(--accent-gold); color: #1A1F26; }
+        .fc-btn.easy { background: var(--accent-mint); color: #1A1F26; }
+        .fc-btn:hover { transform: translateY(-2px); }
+        
+        /* Review Panel */
+        .review-panel { background: var(--bg-surface); border-left: 1px solid var(--border-subtle); padding: 24px; overflow-y: auto; }
+        .review-header { margin-bottom: 24px; }
+        .review-header h2 { font-family: var(--font-display); font-size: 18px; margin-bottom: 8px; }
+        .review-header p { font-size: 13px; color: var(--text-muted); }
+        
+        /* Due Cards */
+        .due-section { margin-bottom: 24px; }
+        .due-title { font-size: 12px; font-weight: 600; color: var(--accent-coral); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .due-count { background: var(--accent-coral); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .due-list { display: flex; flex-direction: column; gap: 8px; }
+        .due-item { background: var(--bg-card); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .due-word { font-weight: 600; font-size: 14px; }
+        .due-time { font-size: 11px; color: var(--text-muted); }
+        
+        /* AI Response */
+        .ai-section { background: var(--bg-card); border-radius: 16px; padding: 20px; }
+        .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+        .ai-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-mint), #4BA8FF); display: grid; place-items: center; }
+        .ai-avatar svg { width: 20px; height: 20px; color: white; }
+        .ai-title { font-size: 14px; font-weight: 600; }
+        .ai-badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: rgba(95,207,181,0.2); color: var(--accent-mint); }
+        .ai-content { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+        .ai-content h4 { font-size: 13px; color: var(--accent-mint); margin: 16px 0 8px 0; }
+        .ai-content h4:first-child { margin-top: 0; }
+        .ai-example { background: rgba(95,207,181,0.08); border-left: 3px solid var(--accent-mint); padding: 12px 16px; border-radius: 8px; font-style: italic; margin: 8px 0; }
+        
+        /* Empty */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty-state svg { width: 64px; height: 64px; opacity: 0.3; margin-bottom: 16px; }
+        .empty-state h3 { font-family: var(--font-display); font-size: 20px; color: var(--text-secondary); margin-bottom: 8px; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-card); border: 1px solid var(--border-base); border-radius: 12px; padding: 14px 24px; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 1000; opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--accent-mint); }
+        .toast.error { border-color: #FF6B6B; }
+
+        /* Loading */
+        .loading { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 40px; }
+        .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-coral); animation: loadPulse 1.4s ease-in-out infinite; }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes loadPulse { 0%, 100% { transform: scale(0.6); opacity: 0.4; } 50% { transform: scale(1); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .app { grid-template-columns: 1fr; } .sidebar, .review-panel { display: none; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <h1>Vocab Master</h1>
+        </div>
+        
+        <div class="streak-card">
+            <div class="streak-fire">🔥</div>
+            <div class="streak-value" id="streakValue">0</div>
+            <div class="streak-label">连续学习天数</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card"><div class="stat-value" id="totalWords">0</div><div class="stat-label">总词汇</div></div>
+            <div class="stat-card"><div class="stat-value" id="masteredWords">0</div><div class="stat-label">已掌握</div></div>
+            <div class="stat-card"><div class="stat-value" id="todayNew">0</div><div class="stat-label">今日新增</div></div>
+            <div class="stat-card"><div class="stat-value" id="todayReview">0</div><div class="stat-label">今日复习</div></div>
+        </div>
+        
+        <div class="tags-section">
+            <h3>分类标签</h3>
+            <div class="tag-list" id="tagList">
+                <div class="tag active" data-tag="all">全部</div>
+                <div class="tag" data-tag="daily">日常<span class="tag-count">(0)</span></div>
+                <div class="tag" data-tag="business">商务<span class="tag-count">(0)</span></div>
+                <div class="tag" data-tag="academic">学术<span class="tag-count">(0)</span></div>
+                <div class="tag" data-tag="tech">科技<span class="tag-count">(0)</span></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+        <div class="mode-tabs">
+            <div class="mode-tab active" data-mode="list">📚 词汇库</div>
+            <div class="mode-tab" data-mode="flashcard">🎴 闪卡复习</div>
+        </div>
+        
+        <!-- List Mode -->
+        <div id="listMode">
+            <div class="input-section">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" class="word-input" id="wordInput" placeholder="输入英语单词，例如 serendipity...">
+                    </div>
+                    <button class="btn-add" id="btnAdd">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        添加
+                    </button>
+                </div>
+                <div class="tag-select">
+                    <label>分类:</label>
+                    <select id="tagSelect">
+                        <option value="daily">日常</option>
+                        <option value="business">商务</option>
+                        <option value="academic">学术</option>
+                        <option value="tech">科技</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="cards-header">
+                <h2>我的词汇库</h2>
+                <span style="font-size:13px;color:var(--text-muted)">数据来源: Free Dictionary API (权威)</span>
+            </div>
+            <div class="cards-list" id="cardsList"></div>
+        </div>
+        
+        <!-- Flashcard Mode -->
+        <div class="flashcard-container" id="flashcardMode">
+            <div class="flashcard" id="flashcard">
+                <div class="flashcard-face flashcard-front">
+                    <div class="flashcard-word" id="fcWord">—</div>
+                    <div class="flashcard-phonetic" id="fcPhonetic">/—/</div>
+                    <div class="flashcard-hint">点击翻转查看释义</div>
+                </div>
+                <div class="flashcard-face flashcard-back">
+                    <div class="flashcard-definition" id="fcDefinition">—</div>
+                </div>
+            </div>
+            <div class="flashcard-controls">
+                <button class="fc-btn hard" onclick="rateCard(1)">😓 困难</button>
+                <button class="fc-btn good" onclick="rateCard(3)">🤔 一般</button>
+                <button class="fc-btn easy" onclick="rateCard(5)">😎 简单</button>
+            </div>
+            <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-muted)">
+                剩余 <strong id="remainingCards">0</strong> 张待复习
+            </div>
+        </div>
+    </main>
+
+    <!-- Review Panel -->
+    <aside class="review-panel">
+        <div class="review-header">
+            <h2>📅 复习计划</h2>
+            <p>基于 SM-2 遗忘曲线算法</p>
+        </div>
+        
+        <div class="due-section">
+            <div class="due-title">今日待复习 <span class="due-count" id="dueCount">0</span></div>
+            <div class="due-list" id="dueList"></div>
+        </div>
+        
+        <div class="ai-section">
+            <div class="ai-header">
+                <div class="ai-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1v3h-1a7 7 0 0 1-7 7H10a7 7 0 0 1-7-7H2v-3h1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 12 2z"/><circle cx="10" cy="14" r="1.5"/><circle cx="14" cy="14" r="1.5"/></svg></div>
+                <div>
+                    <div class="ai-title">AI 学习助手</div>
+                    <span class="ai-badge">DeepSeek</span>
+                </div>
+            </div>
+            <div class="ai-content" id="aiContent">
+                <p style="color:var(--text-muted);text-align:center;padding:20px 0;">点击单词卡片，AI 将生成学习辅助内容</p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== State =====
+const state = {
+    words: JSON.parse(localStorage.getItem('vocabMasterWords') || '[]'),
+    currentTag: 'all',
+    mode: 'list',
+    flashcardIndex: 0,
+    dueCards: [],
+    streak: parseInt(localStorage.getItem('vocabStreak') || '0'),
+    lastStudyDate: localStorage.getItem('lastStudyDate') || ''
+};
+
+// ===== SM-2 Algorithm =====
+function sm2(card, quality) {
+    let { repetitions = 0, easeFactor = 2.5, interval = 1 } = card;
+    
+    if (quality >= 3) {
+        if (repetitions === 0) interval = 1;
+        else if (repetitions === 1) interval = 6;
+        else interval = Math.round(interval * easeFactor);
+        repetitions++;
+    } else {
+        repetitions = 0;
+        interval = 1;
+    }
+    
+    easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+    
+    const nextReview = new Date();
+    nextReview.setDate(nextReview.getDate() + interval);
+    
+    return { repetitions, easeFactor: Math.round(easeFactor * 100) / 100, interval, nextReview: nextReview.toISOString() };
+}
+
+// ===== Dictionary API =====
+async function fetchWord(word) {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    if (!res.ok) throw new Error('未找到该单词');
+    const data = await res.json();
+    const entry = data[0];
+    
+    let phonetic = entry.phonetic || '';
+    let audio = '';
+    if (entry.phonetics) {
+        for (const p of entry.phonetics) {
+            if (p.audio?.includes('us')) { audio = p.audio; if (p.text) phonetic = p.text; break; }
+            if (p.audio && !audio) { audio = p.audio; if (p.text && !phonetic) phonetic = p.text; }
+        }
+    }
+    
+    const meanings = entry.meanings.slice(0, 2).map(m => ({
+        pos: m.partOfSpeech,
+        defs: m.definitions.slice(0, 2).map(d => d.definition),
+        examples: m.definitions.filter(d => d.example).slice(0, 1).map(d => d.example)
+    }));
+    
+    return { word: entry.word, phonetic: phonetic || '/—/', audio, meanings, source: 'Free Dictionary API' };
+}
+
+// ===== Render =====
+function render() {
+    updateStats();
+    renderCards();
+    renderDueList();
+    updateTagCounts();
+    checkStreak();
+}
+
+function updateStats() {
+    document.getElementById('totalWords').textContent = state.words.length;
+    document.getElementById('masteredWords').textContent = state.words.filter(w => (w.repetitions || 0) >= 3).length;
+    const today = new Date().toDateString();
+    document.getElementById('todayNew').textContent = state.words.filter(w => new Date(w.addedAt).toDateString() === today).length;
+    document.getElementById('todayReview').textContent = state.words.filter(w => w.lastReview && new Date(w.lastReview).toDateString() === today).length;
+    document.getElementById('streakValue').textContent = state.streak;
+}
+
+function renderCards() {
+    let words = state.words;
+    if (state.currentTag !== 'all') words = words.filter(w => w.tag === state.currentTag);
+    
+    if (words.length === 0) {
+        document.getElementById('cardsList').innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><h3>暂无词汇</h3><p>添加你的第一个单词开始学习</p></div>`;
+        return;
+    }
+    
+    document.getElementById('cardsList').innerHTML = words.map((w, i) => {
+        const status = (w.repetitions || 0) >= 3 ? 'mastered' : (w.repetitions || 0) >= 1 ? 'learning' : 'new';
+        return `
+        <div class="word-card ${status}" data-idx="${i}" onclick="selectWord(${state.words.indexOf(w)})">
+            <div class="word-info">
+                <div class="word-text">${w.word}</div>
+                <div class="phonetic">${w.phonetic} <span class="source">${w.source || 'API'}</span></div>
+                <div class="definition">${w.meanings.map(m => `<span class="pos-tag">${m.pos}</span>${m.defs[0]}`).join('<br>')}</div>
+                <div class="word-tag">#${w.tag || 'daily'}</div>
+            </div>
+            <button class="play-btn" onclick="event.stopPropagation(); playAudio('${w.audio}', '${w.word}')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+        </div>`;
+    }).join('');
+}
+
+function renderDueList() {
+    const now = new Date();
+    state.dueCards = state.words.filter(w => !w.nextReview || new Date(w.nextReview) <= now);
+    document.getElementById('dueCount').textContent = state.dueCards.length;
+    document.getElementById('remainingCards').textContent = state.dueCards.length;
+    
+    document.getElementById('dueList').innerHTML = state.dueCards.slice(0, 5).map(w => `
+        <div class="due-item">
+            <span class="due-word">${w.word}</span>
+            <span class="due-time">${w.nextReview ? '已到期' : '新词'}</span>
+        </div>
+    `).join('') || '<p style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">今日无待复习</p>';
+}
+
+function updateTagCounts() {
+    ['daily', 'business', 'academic', 'tech'].forEach(tag => {
+        const count = state.words.filter(w => w.tag === tag).length;
+        const el = document.querySelector(`.tag[data-tag="${tag}"] .tag-count`);
+        if (el) el.textContent = `(${count})`;
+    });
+}
+
+function checkStreak() {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (state.lastStudyDate === today) return;
+    if (state.lastStudyDate === yesterday) { state.streak++; }
+    else if (state.lastStudyDate !== today) { state.streak = state.words.some(w => new Date(w.addedAt).toDateString() === today) ? 1 : 0; }
+    state.lastStudyDate = today;
+    localStorage.setItem('vocabStreak', state.streak);
+    localStorage.setItem('lastStudyDate', today);
+}
+
+// ===== Actions =====
+async function addWord() {
+    const word = document.getElementById('wordInput').value.trim().toLowerCase();
+    if (!word) return;
+    if (state.words.some(w => w.word === word)) { showToast('该单词已存在', 'error'); return; }
+    
+    document.getElementById('btnAdd').innerHTML = '<div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>';
+    
+    try {
+        const data = await fetchWord(word);
+        const newWord = { ...data, tag: document.getElementById('tagSelect').value, addedAt: new Date().toISOString(), repetitions: 0, easeFactor: 2.5, interval: 1 };
+        state.words.unshift(newWord);
+        save();
+        render();
+        document.getElementById('wordInput').value = '';
+        showToast(`"${word}" 已添加 ✓`);
+    } catch (e) { showToast(e.message, 'error'); }
+    
+    document.getElementById('btnAdd').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 添加';
+}
+
+function selectWord(idx) {
+    const word = state.words[idx];
+    generateAI(word);
+}
+
+function playAudio(url, word) {
+    if (url) { new Audio(url).play(); }
+    else { const u = new SpeechSynthesisUtterance(word); u.lang = 'en-US'; speechSynthesis.speak(u); }
+}
+
+// ===== Flashcard =====
+function showFlashcard() {
+    if (state.dueCards.length === 0) { showToast('暂无待复习单词'); return; }
+    state.flashcardIndex = 0;
+    updateFlashcard();
+}
+
+function updateFlashcard() {
+    const card = state.dueCards[state.flashcardIndex];
+    if (!card) { showToast('复习完成！🎉'); switchMode('list'); return; }
+    document.getElementById('fcWord').textContent = card.word;
+    document.getElementById('fcPhonetic').textContent = card.phonetic;
+    document.getElementById('fcDefinition').textContent = card.meanings.map(m => `[${m.pos}] ${m.defs.join('; ')}`).join('\n\n');
+    document.getElementById('flashcard').classList.remove('flipped');
+    document.getElementById('remainingCards').textContent = state.dueCards.length - state.flashcardIndex;
+}
+
+window.rateCard = function(quality) {
+    const card = state.dueCards[state.flashcardIndex];
+    const idx = state.words.findIndex(w => w.word === card.word);
+    const updated = sm2(card, quality);
+    state.words[idx] = { ...state.words[idx], ...updated, lastReview: new Date().toISOString() };
+    save();
+    state.flashcardIndex++;
+    updateFlashcard();
+    render();
+};
+
+// ===== AI =====
+async function generateAI(word) {
+    const el = document.getElementById('aiContent');
+    el.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+    
+    // 使用权威例句（来自 API）
+    const example = word.meanings.find(m => m.examples?.length)?.examples[0];
+    
+    el.innerHTML = `
+        <h4>📖 权威例句</h4>
+        ${example ? `<div class="ai-example">"${example}"</div>` : '<p style="color:var(--text-muted)">API 未提供例句</p>'}
+        <h4>🧠 词根助记</h4>
+        <p>请输入 DeepSeek API Key 获取 AI 生成的助记法</p>
+        <h4>📊 学习进度</h4>
+        <p>复习次数: ${word.repetitions || 0} | 难度因子: ${word.easeFactor || 2.5} | 下次复习: ${word.nextReview ? new Date(word.nextReview).toLocaleDateString() : '今天'}</p>
+    `;
+}
+
+// ===== Utility =====
+function save() { localStorage.setItem('vocabMasterWords', JSON.stringify(state.words)); }
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast ' + type;
+    setTimeout(() => t.classList.add('show'), 10);
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function switchMode(mode) {
+    state.mode = mode;
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+    document.getElementById('listMode').style.display = mode === 'list' ? 'block' : 'none';
+    document.getElementById('flashcardMode').classList.toggle('active', mode === 'flashcard');
+    if (mode === 'flashcard') showFlashcard();
+}
+
+// ===== Events =====
+document.getElementById('btnAdd').onclick = addWord;
+document.getElementById('wordInput').onkeypress = e => { if (e.key === 'Enter') addWord(); };
+document.querySelectorAll('.mode-tab').forEach(t => t.onclick = () => switchMode(t.dataset.mode));
+document.querySelectorAll('.tag').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tag').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    state.currentTag = t.dataset.tag;
+    renderCards();
+});
+document.getElementById('flashcard').onclick = () => document.getElementById('flashcard').classList.toggle('flipped');
+
+// ===== Init =====
+render();
+</script>
+</body>
+</html>
